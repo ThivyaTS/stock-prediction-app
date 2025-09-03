@@ -138,51 +138,60 @@ if uploaded_file is not None:
     st.subheader("Input Data")
     st.dataframe(df)
 
-    # --------------------------
-    # Parameters
-    # --------------------------
-    features = ['Open', 'Close', 'Volume']  # input features
-    target_cols = ['Open', 'Close']
-    timesteps = 20
+from sklearn.preprocessing import MinMaxScaler,PowerTransformer
 
-    # --------------------------
-    # Check if enough rows
-    # --------------------------
-    if len(df) < timesteps:
-        st.error(f"Uploaded CSV must have at least {timesteps} rows for prediction.")
-    else:
-        # --------------------------
-        # Create sequences
-        # --------------------------
-        X_input = []
-        for i in range(timesteps, len(df)):
-            X_input.append(df[features].iloc[i-timesteps:i].values)
-        X_input = np.array(X_input)
+volatility_features = ['Rolling Volatility', 'Bollinger_Width']
+pt_volatility = PowerTransformer(method='box-cox', standardize=False)
+dataFrame[volatility_features] = pt_volatility.fit_transform(dataFrame[volatility_features])
 
-        # --------------------------
-        # Scale features
-        # --------------------------
-        scaler_X = MinMaxScaler()
-        X_input_reshaped = X_input.reshape(-1, len(features))
-        X_input_scaled = scaler_X.fit_transform(X_input_reshaped).reshape(X_input.shape)
+imputer = SimpleImputer(missing_values=np.nan)  # Handling missing values
+df = pd.DataFrame(imputer.fit_transform(df), columns=df.columns)
+df = df.reset_index(drop=True)
+# Applying feature scaling
+scaler = MinMaxScaler(feature_range=(0, 1))
+df_scaled = scaler.fit_transform(df.to_numpy())
+df_scaled = pd.DataFrame(df_scaled, columns=list(df.columns))
+target_scaler = MinMaxScaler(feature_range=(0, 1))
+df_scaled[['Open', 'Close']] = target_scaler.fit_transform(df[['Open', 'Close']].to_numpy())
+df_scaled = df_scaled.astype(float)
+        
+# --------------------------
+# Parameters
+# --------------------------
+timesteps = 20
+features = list(df_scaled.columns)  # all columns after scaling
 
-        # --------------------------
-        # Predict
-        # --------------------------
-        predicted = model.predict(X_input_scaled)  # shape: (num_samples, 2)
+# --------------------------
+# Create LSTM sequences
+# --------------------------
+X_input = []
+for i in range(timesteps, len(df_scaled)):
+    X_input.append(df_scaled[features].iloc[i-timesteps:i].values)
+X_input = np.array(X_input)
 
-        # --------------------------
-        # Prepare results table
-        # --------------------------
-        result_df = df.iloc[timesteps:].copy()  # corresponding dates
-        result_df[['Predicted Open', 'Predicted Close']] = predicted
+# --------------------------
+# Predict
+# --------------------------
+predicted_scaled = model.predict(X_input)  # shape: (num_samples, 2)
 
-        # Add previous day actuals
-        prev_actual = df[target_cols].iloc[timesteps-1:-1].reset_index(drop=True)
-        result_df['Prev Day Open'] = prev_actual['Open']
-        result_df['Prev Day Close'] = prev_actual['Close']
+# --------------------------
+# Inverse transform predictions to original scale
+# --------------------------
+predicted = target_scaler.inverse_transform(predicted_scaled)
+predicted_df = pd.DataFrame(predicted, columns=['Predicted Open', 'Predicted Close'])
 
-        # Select columns for display
-        display_cols = ['Date', 'Predicted Open', 'Predicted Close', 'Prev Day Open', 'Prev Day Close']
-        st.subheader("Predictions with Previous Day Actuals")
-        st.dataframe(result_df[display_cols])
+# --------------------------
+# Prepare results table
+# --------------------------
+result_df = df.iloc[timesteps:].copy().reset_index(drop=True)
+result_df[['Predicted Open','Predicted Close']] = predicted_df
+
+# Add previous day actual Open/Close
+prev_actual = df[['Open','Close']].iloc[timesteps-1:-1].reset_index(drop=True)
+result_df['Prev Day Open'] = prev_actual['Open']
+result_df['Prev Day Close'] = prev_actual['Close']
+
+# Select columns to display
+display_cols = ['Date', 'Predicted Open', 'Predicted Close', 'Prev Day Open', 'Prev Day Close']
+st.subheader("Predictions with Previous Day Actuals")
+st.dataframe(result_df[display_cols])
