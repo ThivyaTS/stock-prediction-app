@@ -120,36 +120,61 @@ with col2:
     
     st.plotly_chart(fig2, use_container_width=True)
 
-# # Now import TensorFlow
-# import tensorflow as tf
+# --------------------------
+# Load model
+# --------------------------
+model = tf.keras.models.load_model("multivariate_lstm_model.keras")
 
-# # Replace with your actual file path
-# model = tf.keras.models.load_model("multivariate_lstm_model.keras")
+# --------------------------
+# Upload CSV
+# --------------------------
+uploaded_file = st.file_uploader("Upload CSV for prediction", type=["csv"])
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    df['Date'] = pd.to_datetime(df['Date'])
+    st.subheader("Input Data")
+    st.dataframe(df)
 
-# X_test =  0.6 # your test features
-# y_test = 0.1# your actual target
-# y_test_dates = 0.7  # corresponding dates for plotting
+    # --------------------------
+    # Parameters
+    # --------------------------
+    features = ['Open', 'Close', 'Volume']  # input features
+    target_cols = ['Open', 'Close']
+    timesteps = 20
 
-# # X_test shape should be (num_samples, timesteps, num_features)
-# predicted = model.predict(X_test)
+    # --------------------------
+    # Create sequences for LSTM
+    # --------------------------
+    X_input = []
+    for i in range(timesteps, len(df)):
+        X_input.append(df[features].iloc[i-timesteps:i].values)
+    X_input = np.array(X_input)
 
-# # If scaled, inverse transform
-# target_scaler = ...  # your scaler used for y
-# y_test_original = target_scaler.inverse_transform(y_test)
-# predicted_original = target_scaler.inverse_transform(predicted)
+    # --------------------------
+    # Scale features
+    # --------------------------
+    scaler_X = MinMaxScaler()
+    X_input_reshaped = X_input.reshape(-1, len(features))
+    X_input_scaled = scaler_X.fit_transform(X_input_reshaped).reshape(X_input.shape)
 
-# # Plot
-# fig_pred = go.Figure()
-# fig_pred.add_trace(go.Scatter(x=y_test_dates, y=y_test_original.flatten(),
-#                               mode='lines+markers', name='Actual'))
-# fig_pred.add_trace(go.Scatter(x=y_test_dates, y=predicted_original.flatten(),
-#                               mode='lines+markers', name='Predicted'))
+    # --------------------------
+    # Predict
+    # --------------------------
+    predicted = model.predict(X_input_scaled)  # shape: (num_samples, 2)
 
-# fig_pred.update_layout(title="Predictions vs Actual",
-#                        xaxis_title="Date", yaxis_title="Price",
-#                        template='plotly_white', height=500)
+    # --------------------------
+    # Prepare table
+    # --------------------------
+    result_df = df.iloc[timesteps:].copy()  # dates corresponding to predictions
+    # Add predictions
+    result_df[['Predicted Open', 'Predicted Close']] = predicted
 
-# st.plotly_chart(fig_pred, use_container_width=True)
+    # Add previous day actual values
+    prev_actual = df[target_cols].iloc[timesteps-1:-1].reset_index(drop=True)
+    result_df['Prev Day Open'] = prev_actual['Open']
+    result_df['Prev Day Close'] = prev_actual['Close']
 
-
-
+    # Select columns for display
+    display_cols = ['Date', 'Predicted Open', 'Predicted Close', 'Prev Day Open', 'Prev Day Close']
+    st.subheader("Predictions with Previous Day Actuals")
+    st.dataframe(result_df[display_cols])
