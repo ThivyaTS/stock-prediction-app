@@ -2,6 +2,7 @@ streamlit
 tensorflow
 shap
 matplotlib
+seaborn
 pandas
 numpy
 plotly>=5.0.0
