@@ -21,6 +21,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
+from sklearn.impute import SimpleImputer
+import tensorflow as tf
+from sklearn.preprocessing import MinMaxScaler
 
 
 st.set_page_config(
@@ -121,8 +124,7 @@ with col2:
     
     st.plotly_chart(fig2, use_container_width=True)
 
-import tensorflow as tf
-from sklearn.preprocessing import MinMaxScaler
+
 # --------------------------
 # Load model
 # --------------------------
