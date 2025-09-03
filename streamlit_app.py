@@ -142,7 +142,7 @@ from sklearn.preprocessing import MinMaxScaler,PowerTransformer
 
 volatility_features = ['Rolling Volatility', 'Bollinger_Width']
 pt_volatility = PowerTransformer(method='box-cox', standardize=False)
-df[volatility_features] = pt_volatility.fit_transform(dataFrame[volatility_features])
+df[volatility_features] = pt_volatility.fit_transform(df[volatility_features])
 
 imputer = SimpleImputer(missing_values=np.nan)  # Handling missing values
 df = pd.DataFrame(imputer.fit_transform(df), columns=df.columns)
