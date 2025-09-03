@@ -120,6 +120,8 @@ with col2:
     
     st.plotly_chart(fig2, use_container_width=True)
 
+import tensorflow as tf
+from sklearn.preprocessing import MinMaxScaler
 # --------------------------
 # Load model
 # --------------------------
