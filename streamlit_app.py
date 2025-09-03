@@ -120,36 +120,36 @@ with col2:
     
     st.plotly_chart(fig2, use_container_width=True)
 
-# Now import TensorFlow
-import tensorflow as tf
+# # Now import TensorFlow
+# import tensorflow as tf
 
-# Replace with your actual file path
-model = tf.keras.models.load_model("multivariate_lstm_model.keras")
+# # Replace with your actual file path
+# model = tf.keras.models.load_model("multivariate_lstm_model.keras")
 
-X_test =  0.6 # your test features
-y_test = 0.1# your actual target
-y_test_dates = 0.7  # corresponding dates for plotting
+# X_test =  0.6 # your test features
+# y_test = 0.1# your actual target
+# y_test_dates = 0.7  # corresponding dates for plotting
 
-# X_test shape should be (num_samples, timesteps, num_features)
-predicted = model.predict(X_test)
+# # X_test shape should be (num_samples, timesteps, num_features)
+# predicted = model.predict(X_test)
 
-# If scaled, inverse transform
-target_scaler = ...  # your scaler used for y
-y_test_original = target_scaler.inverse_transform(y_test)
-predicted_original = target_scaler.inverse_transform(predicted)
+# # If scaled, inverse transform
+# target_scaler = ...  # your scaler used for y
+# y_test_original = target_scaler.inverse_transform(y_test)
+# predicted_original = target_scaler.inverse_transform(predicted)
 
-# Plot
-fig_pred = go.Figure()
-fig_pred.add_trace(go.Scatter(x=y_test_dates, y=y_test_original.flatten(),
-                              mode='lines+markers', name='Actual'))
-fig_pred.add_trace(go.Scatter(x=y_test_dates, y=predicted_original.flatten(),
-                              mode='lines+markers', name='Predicted'))
+# # Plot
+# fig_pred = go.Figure()
+# fig_pred.add_trace(go.Scatter(x=y_test_dates, y=y_test_original.flatten(),
+#                               mode='lines+markers', name='Actual'))
+# fig_pred.add_trace(go.Scatter(x=y_test_dates, y=predicted_original.flatten(),
+#                               mode='lines+markers', name='Predicted'))
 
-fig_pred.update_layout(title="Predictions vs Actual",
-                       xaxis_title="Date", yaxis_title="Price",
-                       template='plotly_white', height=500)
+# fig_pred.update_layout(title="Predictions vs Actual",
+#                        xaxis_title="Date", yaxis_title="Price",
+#                        template='plotly_white', height=500)
 
-st.plotly_chart(fig_pred, use_container_width=True)
+# st.plotly_chart(fig_pred, use_container_width=True)
 
 
 
