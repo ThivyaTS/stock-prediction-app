@@ -134,7 +134,6 @@ model = tf.keras.models.load_model("multivariate_lstm_model.keras")
 uploaded_file = st.file_uploader("Upload CSV for prediction", type=["csv"])
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-    df['Date'] = pd.to_datetime(df['Date'])
     st.subheader("Input Data")
     st.dataframe(df)
 
