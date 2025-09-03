@@ -128,7 +128,7 @@ from sklearn.preprocessing import MinMaxScaler
 model = tf.keras.models.load_model("multivariate_lstm_model.keras")
 
 # --------------------------
-# Upload CSV
+# CSV Upload
 # --------------------------
 uploaded_file = st.file_uploader("Upload CSV for prediction", type=["csv"])
 if uploaded_file is not None:
@@ -145,38 +145,43 @@ if uploaded_file is not None:
     timesteps = 20
 
     # --------------------------
-    # Create sequences for LSTM
+    # Check if enough rows
     # --------------------------
-    X_input = []
-    for i in range(timesteps, len(df)):
-        X_input.append(df[features].iloc[i-timesteps:i].values)
-    X_input = np.array(X_input)
+    if len(df) < timesteps:
+        st.error(f"Uploaded CSV must have at least {timesteps} rows for prediction.")
+    else:
+        # --------------------------
+        # Create sequences
+        # --------------------------
+        X_input = []
+        for i in range(timesteps, len(df)):
+            X_input.append(df[features].iloc[i-timesteps:i].values)
+        X_input = np.array(X_input)
 
-    # --------------------------
-    # Scale features
-    # --------------------------
-    scaler_X = MinMaxScaler()
-    X_input_reshaped = X_input.reshape(-1, len(features))
-    X_input_scaled = scaler_X.fit_transform(X_input_reshaped).reshape(X_input.shape)
+        # --------------------------
+        # Scale features
+        # --------------------------
+        scaler_X = MinMaxScaler()
+        X_input_reshaped = X_input.reshape(-1, len(features))
+        X_input_scaled = scaler_X.fit_transform(X_input_reshaped).reshape(X_input.shape)
 
-    # --------------------------
-    # Predict
-    # --------------------------
-    predicted = model.predict(X_input_scaled)  # shape: (num_samples, 2)
+        # --------------------------
+        # Predict
+        # --------------------------
+        predicted = model.predict(X_input_scaled)  # shape: (num_samples, 2)
 
-    # --------------------------
-    # Prepare table
-    # --------------------------
-    result_df = df.iloc[timesteps:].copy()  # dates corresponding to predictions
-    # Add predictions
-    result_df[['Predicted Open', 'Predicted Close']] = predicted
+        # --------------------------
+        # Prepare results table
+        # --------------------------
+        result_df = df.iloc[timesteps:].copy()  # corresponding dates
+        result_df[['Predicted Open', 'Predicted Close']] = predicted
 
-    # Add previous day actual values
-    prev_actual = df[target_cols].iloc[timesteps-1:-1].reset_index(drop=True)
-    result_df['Prev Day Open'] = prev_actual['Open']
-    result_df['Prev Day Close'] = prev_actual['Close']
+        # Add previous day actuals
+        prev_actual = df[target_cols].iloc[timesteps-1:-1].reset_index(drop=True)
+        result_df['Prev Day Open'] = prev_actual['Open']
+        result_df['Prev Day Close'] = prev_actual['Close']
 
-    # Select columns for display
-    display_cols = ['Date', 'Predicted Open', 'Predicted Close', 'Prev Day Open', 'Prev Day Close']
-    st.subheader("Predictions with Previous Day Actuals")
-    st.dataframe(result_df[display_cols])
+        # Select columns for display
+        display_cols = ['Date', 'Predicted Open', 'Predicted Close', 'Prev Day Open', 'Prev Day Close']
+        st.subheader("Predictions with Previous Day Actuals")
+        st.dataframe(result_df[display_cols])
