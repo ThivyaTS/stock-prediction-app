@@ -163,8 +163,8 @@ if uploaded_file is not None:
 # --------------------------
     X_input = []
         for i in range(timesteps, len(df_scaled)):
-        X_input.append(df_scaled[features].iloc[i-timesteps:i].values)
-    X_input = np.array(X_input)
+            X_input.append(df_scaled[features].iloc[i-timesteps:i].values)
+            X_input = np.array(X_input)
 
 # --------------------------
 # Predict
