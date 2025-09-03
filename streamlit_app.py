@@ -60,13 +60,13 @@ with col1:
     fig1.add_trace(go.Scatter(
         x=ticker_data['Date'],
         y=ticker_data['Open'],
-        mode='lines+markers',
+        mode='lines',
         name='Open'
     ))
     fig1.add_trace(go.Scatter(
         x=ticker_data['Date'],
         y=ticker_data['Close'],
-        mode='lines+markers',
+        mode='lines',
         name='Close'
     ))
 
