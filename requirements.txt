@@ -1,1 +1,7 @@
 streamlit
+tensorflow
+shap
+matplotlib
+pandas
+numpy
+plotly>=5.0.0
