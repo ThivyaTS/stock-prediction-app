@@ -150,9 +150,9 @@ def load_npy(path):
 def load_trained_model(path):
     return load_model(path)
 
-import pickle
-with open("target_scaler.pkl", "rb") as f:
-    target_scaler = pickle.load(f)
+import joblib
+target_scaler = joblib.load("target_scaler.pkl")
+
     
 
 X_test_scaled = load_npy(X_TEST_PATH)
