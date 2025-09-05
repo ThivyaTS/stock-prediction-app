@@ -219,30 +219,19 @@ explainer = shap.KernelExplainer(model_predict_wrapper, background_flat)
 X_sample_flat = X_test_scaled[:10].reshape(10, -1)
 shap_values = explainer.shap_values(X_sample_flat)
 
-# -----------------------------
-# Plot SHAP summary
-# -----------------------------
-samples_to_plot = shap_values.shape[0]
+# 2 outputs: Close and Open
+shap_dfs = []
+for i in range(2):
+    sv = shap_values[i]  # shape: (samples, timesteps*features)
+    df = pd.DataFrame(sv, columns=[f"F{f}_t{t}" for t in range(timesteps) for f in range(features)])
+    df['Output'] = 'Close' if i == 0 else 'Open'
+    shap_dfs.append(df)
 
-for i in range(2):  # for 2 outputs: Close and Open
-    sv_3d = shap_values[:, :, i].reshape(samples_to_plot, timesteps, features)
-    sv_flat = sv_3d.reshape(samples_to_plot, timesteps*features)
-    X_flat = X_test_scaled[:samples_to_plot].reshape(samples_to_plot, timesteps*features)
+shap_df = pd.concat(shap_dfs, axis=0)
+shap_df.reset_index(drop=True, inplace=True)
 
-    feature_names = [f"F{f}_t{t}" for t in range(timesteps) for f in range(features)]
-
-    fig, ax = plt.subplots()
-    shap.summary_plot(sv_flat, X_flat, feature_names=feature_names, show=False,
-                      title=f'SHAP Per-timestep Output {i+1}')
-    st.pyplot(fig)
-
-
-# Store SHAP values
-shap_df = pd.DataFrame(np.array(shap_values).reshape(X_test_scaled.shape[0], X_test_scaled.shape[2]), columns=feature_cols)
-
-# Optional download
+# Save to Excel
 shap_df.to_excel("shap_summary.xlsx", index=False)
-st.download_button("Download SHAP Summary", "shap_summary.xlsx")
 
 # -----------------------------
 # 6. LLM topic selection & prompt
