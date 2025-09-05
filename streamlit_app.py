@@ -1,37 +1,46 @@
 import streamlit as st
-import ollama
+import google.generativeai as genai
 
-# Initialize Ollama client
-client = ollama
+# Configure the Gemini API with your key from Streamlit secrets
+try:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+except KeyError:
+    st.error("API key not found. Please add your GEMINI_API_KEY to the Streamlit secrets.")
+    st.stop()
 
-st.title("💬 LLaMA 3.2 Chatbot")
+# Set up the model for chat
+# For a full list of models, run: for m in genai.list_models(): print(m.name)
+model = genai.GenerativeModel('gemini-pro')
 
-# Initialize chat history
+# Set the page title and a heading for the app
+st.title("My Gemini Chatbot")
+st.header("Ask me anything!")
+
+# Initialize chat history in Streamlit's session state
 if "messages" not in st.session_state:
-    st.session_state["messages"] = []
+    st.session_state.messages = []
 
-# Display chat history
-for msg in st.session_state["messages"]:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+# Display chat messages from history on app rerun
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# User input
-if prompt := st.chat_input("Ask me anything..."):
-    st.session_state["messages"].append({"role": "user", "content": prompt})
+# Accept user input
+if prompt := st.chat_input("What do you want to know?"):
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    # Display user message in chat message container
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Call LLaMA 3.2 via Ollama
+    # Display assistant response in chat message container
     with st.chat_message("assistant"):
-        response = client.chat(
-            model="llama3.2:latest",
-            messages=st.session_state["messages"]
-        )
-        answer = response["content"]
-        st.markdown(answer)
-
-    st.session_state["messages"].append({"role": "assistant", "content": answer})
-
+        # Use the Gemini model to generate a response
+        response = model.generate_content(prompt)
+        st.markdown(response.text)
+    
+    # Add assistant response to chat history
+    st.session_state.messages.append({"role": "assistant", "content": response.text})
 
 # import os
 # import logging
