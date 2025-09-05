@@ -203,8 +203,6 @@ st.subheader("LLM Explanation")
 topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
 
 prompt = f"Explain how the following features contribute to {topic} prediction:\n"
-for feature, value in top_features.items():
-    prompt += f"- {feature}: average SHAP value {value:.4f}\n"
 
 st.text_area("LLM Prompt", prompt, height=200)
 
