@@ -150,12 +150,15 @@ def load_npy(path):
 def load_trained_model(path):
     return load_model(path)
 
-
+import pickle
+with open("target_scaler.pkl", "rb") as f:
+    target_scaler = pickle.load(f)
+    
 
 X_test_scaled = load_npy(X_TEST_PATH)
 y_test_scaled = load_npy(Y_TEST_PATH)
 model = load_trained_model(MODEL_PATH)
-target_scaler = MinMaxScaler(feature_range=(0, 1))
+# target_scaler = MinMaxScaler(feature_range=(0, 1))
 
 feature_cols = [f"Feature_{i}" for i in range(X_test_scaled.shape[2])]
 
