@@ -3,7 +3,7 @@ import streamlit as st
 from openai import OpenAI
 
 # Initialize client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("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"))
 
 st.title("💬 LLM Chatbot with Streamlit")
 
