@@ -2,17 +2,18 @@ import streamlit as st
 import os
 from google.genai import Client
 
-# Initialize Gemini client
-client = Client(api_key=os.getenv("GEMINI_API_KEY"))
+client = Client(api_key=gemini_key)
 
-prompt = "Explain AI in simple terms."
+prompt = "Explain AI in simple terms"
 
-response = client.responses.create(
-    model="gemini-1",  # or "gemini-1.5" if available
-    input=prompt
-)
-
-print(response.output_text)
+try:
+    response = client.responses.create(
+        model="gemini-1",
+        input=prompt
+    )
+    output_text = response.output[0].content[0].text
+except Exception as e:
+    st.error(f"Error generating content: {e}")
 
 # import os
 # import logging
