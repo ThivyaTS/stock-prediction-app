@@ -252,7 +252,7 @@ shap_values = explainer.shap_values(X_sample_flat)  # list of arrays for each ou
 # Create DataFrame per output
 # -----------------------------
 shap_dfs = []
-feature_names = ['Open','High','Low','Close','Adj Close','Volume','SMA_5]
+feature_names = ['Open','High','Low','Close','Adj Close','Volume','SMA_5']
 for i in range(num_outputs):
     sv = shap_values[i]  # shape: (samples, timesteps*features)
     num_features_total = sv.shape[1]  # should be timesteps*features
