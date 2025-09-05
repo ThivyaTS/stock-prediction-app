@@ -2,6 +2,10 @@ import streamlit as st
 import os
 from google.genai import Client
 
+import os
+gemini_key = os.getenv("GEMINI_API_KEY")
+if not gemini_key:
+    st.error("GEMINI_API_KEY is missing!")
 client = Client(api_key=gemini_key)
 
 prompt = "Explain AI in simple terms"
