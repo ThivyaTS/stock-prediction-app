@@ -222,9 +222,20 @@ shap_values = explainer.shap_values(X_sample_flat)
 # -----------------------------
 # Plot SHAP summary
 # -----------------------------
-fig, ax = plt.subplots()
-shap.summary_plot(shap_values, X_sample_flat, show=False)
-st.pyplot(fig)
+samples_to_plot = shap_values.shape[0]
+
+for i in range(2):  # for 2 outputs: Close and Open
+    sv_3d = shap_values[:, :, i].reshape(samples_to_plot, timesteps, features)
+    sv_flat = sv_3d.reshape(samples_to_plot, timesteps*features)
+    X_flat = X_test_scaled[:samples_to_plot].reshape(samples_to_plot, timesteps*features)
+
+    feature_names = [f"F{f}_t{t}" for t in range(timesteps) for f in range(features)]
+
+    fig, ax = plt.subplots()
+    shap.summary_plot(sv_flat, X_flat, feature_names=feature_names, show=False,
+                      title=f'SHAP Per-timestep Output {i+1}')
+    st.pyplot(fig)
+
 
 # Store SHAP values
 shap_df = pd.DataFrame(np.array(shap_values).reshape(X_test_scaled.shape[0], X_test_scaled.shape[2]), columns=feature_cols)
