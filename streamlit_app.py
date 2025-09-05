@@ -1,16 +1,16 @@
 import os
 import streamlit as st
-import openai
+from openai import OpenAI
 
-# Load API key from environment variable
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Initialize client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.title("💬 LLM Chatbot with Streamlit")
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
-# Show chat history
+# Display chat history
 for msg in st.session_state["messages"]:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
@@ -21,25 +21,18 @@ if prompt := st.chat_input("Ask me anything..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Call OpenAI LLM
+    # Call new OpenAI API
     with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
-
-        response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",  # You can change to "gpt-4o" or "gpt-3.5-turbo"
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
             messages=st.session_state["messages"],
-            stream=True,
+            max_tokens=500
         )
+        answer = response.choices[0].message.content
+        st.markdown(answer)
 
-        for chunk in response:
-            if chunk.choices[0].delta.get("content"):
-                full_response += chunk.choices[0].delta.content
-                message_placeholder.markdown(full_response + "▌")
+    st.session_state["messages"].append({"role": "assistant", "content": answer})
 
-        message_placeholder.markdown(full_response)
-
-    st.session_state["messages"].append({"role": "assistant", "content": full_response})
 
 
 
