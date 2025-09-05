@@ -7,59 +7,15 @@ import os
 import requests
 import json
 
-st.title("Gemini 2.0 Flash Content Generator")
+from google import genai
 
-# --- Set your API key in Streamlit Secrets ---
-API_KEY = os.getenv("GEMINI_API_KEY")
-if not API_KEY:
-    st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
-    st.stop()
+# The client gets the API key from the environment variable `GEMINI_API_KEY`.
+client = genai.Client()
 
-# --- Dropdown for user topic selection ---
-topic = st.selectbox(
-    "Choose a topic:",
-    ["Artificial Intelligence", "Stock Market", "Cryptocurrency", "Finance"]
+response = client.models.generate_content(
+    model="gemini-2.5-flash", contents="Explain how AI works in a few words"
 )
-
-# Optional user prompt
-user_prompt = st.text_area("Or enter your own prompt:")
-
-if st.button("Generate Content"):
-    # Construct the prompt
-    prompt_text = user_prompt if user_prompt else f"Explain {topic} in simple words"
-
-    # Gemini 2.0 Flash API endpoint
-    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
-
-    headers = {
-        "Content-Type": "application/json",
-        "X-goog-api-key": API_KEY
-    }
-
-    data = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": prompt_text}
-                ]
-            }
-        ]
-    }
-
-    try:
-        response = requests.post(url, headers=headers, data=json.dumps(data))
-        response.raise_for_status()
-        result = response.json()
-
-        # Extract the generated text
-        generated_text = result["candidates"][0]["content"][0]["text"]
-
-        st.subheader("Generated Content")
-        st.write(generated_text)
-
-    except Exception as e:
-        st.error(f"Error generating content: {e}")
-
+print(response.text)
 
 
 # import os
