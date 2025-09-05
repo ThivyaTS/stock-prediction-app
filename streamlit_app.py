@@ -1,29 +1,28 @@
 import streamlit as st
-import google.generativeai as genai
+import os
+from google.genai import Client
 
-import google.generativeai as genai
+# Initialize Gemini client
+client = Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Your prepared SHAP summary string from the previous step
-# For example:
-# shap_summary_string = "feature      importance\n0      Age        0.25\n1  Education    0.18\n..."
+st.title("Gemini AI Content Generator")
 
-# Construct the full prompt
-prompt = f"""
-I have a machine learning model's feature importance data in SHAP summary format. 
-Please explain the feature importance in simple English for a non-technical audience. 
-Highlight the top 3 most important features and what they mean.
+# User selects a topic
+topic = st.selectbox("Choose a topic:", ["Stocks", "AI", "Crypto", "Finance"])
 
-Here is the SHAP summary data:
-{'hey'}
-"""
+# User enters a custom prompt
+user_prompt = st.text_area("Or enter your prompt:")
 
-# Call the Gemini model
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel('gemini-pro')
-response = model.generate_content(prompt)
+if st.button("Generate"):
+    prompt = user_prompt if user_prompt else f"Explain about {topic} in detail."
 
-# Display the response in your Streamlit dashboard
-st.markdown(response.text)
+    # Call Gemini API
+    response = client.generate_text(prompt=prompt)
+
+    # Display response
+    st.subheader("Generated Content")
+    st.write(response.text)
+
 
 # import os
 # import logging
