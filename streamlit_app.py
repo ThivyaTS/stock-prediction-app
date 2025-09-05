@@ -1,37 +1,64 @@
 import streamlit as st
 from ollama import Ollama
 
+# --------------------------
 # Initialize Ollama client
+# --------------------------
 client = Ollama()
 
+# --------------------------
+# Page title
+# --------------------------
+st.set_page_config(page_title="💬 LLaMA 3.2 Chatbot", layout="wide")
 st.title("💬 LLaMA 3.2 Chatbot")
 
-# Store chat history
+# --------------------------
+# Clear chat history button
+# --------------------------
+if st.button("Reset Chat"):
+    st.session_state.clear()
+
+# --------------------------
+# Initialize chat history
+# --------------------------
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
+# --------------------------
 # Display chat history
+# --------------------------
 for msg in st.session_state["messages"]:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
+# --------------------------
 # User input
+# --------------------------
 if prompt := st.chat_input("Ask me anything..."):
+    # Add user message to session state
     st.session_state["messages"].append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Call Ollama LLaMA 3.2
+    # --------------------------
+    # Call LLaMA 3.2 via Ollama
+    # --------------------------
     with st.chat_message("assistant"):
+        # Streaming response placeholder (optional)
+        message_placeholder = st.empty()
+        full_response = ""
+
+        # Fetch response from Ollama
         response = client.chat(
             model="llama3.2:latest",
             messages=st.session_state["messages"]
         )
-        answer = response["content"]
-        st.markdown(answer)
 
-    # Save assistant response
-    st.session_state["messages"].append({"role": "assistant", "content": answer})
+        full_response = response["content"]
+        message_placeholder.markdown(full_response)
+
+    # Add assistant response to session state
+    st.session_state["messages"].append({"role": "assistant", "content": full_response})
 
 # import os
 # import logging
