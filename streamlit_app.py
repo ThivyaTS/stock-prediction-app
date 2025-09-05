@@ -3,7 +3,7 @@ import streamlit as st
 import openai
 
 # Load API key from environment variable
-openai.api_key = os.getenv("sk-proj-uClcbBD1-oyYTRYB2t8S2Yab7Q4lOrz_GJadqWILP2PrxzpiIBtmNWjdJdRnVv4P8ruIbUExupT3BlbkFJf_XFarFhSVU420bUrHyGlY2dymwzRY5YmYve1eBYBjVC10dAveMcMcxRb0gl7GdBefVC1HtiQAsk-proj-uClcbBD1-oyYTRYB2t8S2Yab7Q4lOrz_GJadqWILP2PrxzpiIBtmNWjdJdRnVv4P8ruIbUExupT3BlbkFJf_XFarFhSVU420bUrHyGlY2dymwzRY5YmYve1eBYBjVC10dAveMcMcxRb0gl7GdBefVC1HtiQA")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 st.title("💬 LLM Chatbot with Streamlit")
 
