@@ -5,24 +5,14 @@ from google.genai import Client
 # Initialize Gemini client
 client = Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-st.title("Gemini AI Content Generator")
+prompt = "Explain AI in simple terms."
 
-# User selects a topic
-topic = st.selectbox("Choose a topic:", ["Stocks", "AI", "Crypto", "Finance"])
+response = client.responses.create(
+    model="gemini-1",  # or "gemini-1.5" if available
+    input=prompt
+)
 
-# User enters a custom prompt
-user_prompt = st.text_area("Or enter your prompt:")
-
-if st.button("Generate"):
-    prompt = user_prompt if user_prompt else f"Explain about {topic} in detail."
-
-    # Call Gemini API
-    response = client.generate_text(prompt=prompt)
-
-    # Display response
-    st.subheader("Generated Content")
-    st.write(response.text)
-
+print(response.output_text)
 
 # import os
 # import logging
