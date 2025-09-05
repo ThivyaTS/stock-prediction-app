@@ -10,3 +10,8 @@ streamlit
 ollama
 python-dotenv   # optional, only if you plan to use .env for config
 google-generativeai
+streamlit
+pandas
+torch
+transformers
+google-genai
