@@ -23,8 +23,8 @@ st.set_page_config(
     page_title="Stock Dashboard",
     layout="wide"  # makes the page full-width
 )
-st.title("🎈 My Thivya app")
-st.title("Interactive EDA Dashboard")
+
+st.title("Stock Price Visualization")
 
 # Load dataset
 @st.cache_data  # caches the dataset for faster reload
@@ -128,7 +128,7 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Stock Prediction Dashboard", layout="wide")
 
-st.title("Stock Prediction Dashboard")
+st.title("Stock Prediction")
 
 # -----------------------------
 # 1. Load test data & model
