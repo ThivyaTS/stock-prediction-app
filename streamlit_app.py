@@ -140,7 +140,6 @@ st.title("📊 Stock Prediction & SHAP Explanation Dashboard")
 X_TEST_PATH = "X_test_scaled.npy"
 Y_TEST_PATH = "y_test_scaled.npy"
 MODEL_PATH = "trained_model_aapl.h5"
-SCALER_PATH = "target_scaler.pkl"
 
 @st.cache_data
 def load_npy(path):
@@ -150,15 +149,12 @@ def load_npy(path):
 def load_trained_model(path):
     return load_model(path)
 
-@st.cache_resource
-def load_scaler(path):
-    with open(path, "rb") as f:
-        return pickle.load(f)
+
 
 X_test_scaled = load_npy(X_TEST_PATH)
 y_test_scaled = load_npy(Y_TEST_PATH)
 model = load_trained_model(MODEL_PATH)
-target_scaler = load_scaler(SCALER_PATH)
+target_scaler = MinMaxScaler(feature_range=(0, 1))
 
 feature_cols = [f"Feature_{i}" for i in range(X_test_scaled.shape[2])]
 
