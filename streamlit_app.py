@@ -202,8 +202,6 @@ st.dataframe(results_df)
 st.subheader("LLM Explanation")
 topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
 
-top_features = shap_df.mean().sort_values(ascending=False).head(5)
-
 prompt = f"Explain how the following features contribute to {topic} prediction:\n"
 for feature, value in top_features.items():
     prompt += f"- {feature}: average SHAP value {value:.4f}\n"
