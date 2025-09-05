@@ -251,6 +251,8 @@ shap_values = explainer.shap_values(X_sample_flat)  # list of arrays for each ou
 # -----------------------------
 # Create DataFrame per output
 # -----------------------------
+feature_names = [f"F{f}_t{t}" for t in range(timesteps) for f in range(features)]
+
 st.write("Number of feature names:", len(feature_names))
 st.write("Expected number of features:", num_features_total)
 st.write("Feature names:", feature_names)
