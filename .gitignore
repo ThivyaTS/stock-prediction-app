@@ -1,7 +1,5 @@
 .streamlit/secrets.toml
 
-# Ollama downloaded models
-~/.ollama/models/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
