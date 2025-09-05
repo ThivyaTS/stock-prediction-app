@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go   # ← add this
+import plotly.graph_objects as go
 import os
 from google import genai  # make sure google-genai>=0.11.0 is in requirements.txt
 
