@@ -10,14 +10,12 @@ client = Client(api_key=gemini_key)
 
 prompt = "Explain AI in simple terms"
 
-try:
-    response = client.responses.create(
-        model="gemini-1",
-        input=prompt
-    )
-    output_text = response.output[0].content[0].text
-except Exception as e:
-    st.error(f"Error generating content: {e}")
+response = client.chat.create(
+    model="gemini-1.5-chat",
+    messages=[{"role": "user", "content": "Explain AI in simple terms"}]
+)
+generated_text = response.last
+
 
 # import os
 # import logging
