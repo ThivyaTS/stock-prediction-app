@@ -201,16 +201,29 @@ st.dataframe(results_df)
 # -----------------------------
 st.subheader("SHAP Summary Plot")
 
+timesteps = X_test_scaled.shape[1]
+features = X_test_scaled.shape[2]
+
 @st.cache_data
-def compute_shap(model, X):
-    explainer = shap.KernelExplainer(model.predict, X)
-    shap_values = explainer.shap_values(X)
-    return shap_values
+def model_predict_wrapper(X_flat):
+    X_3d = X_flat.reshape(X_flat.shape[0], timesteps, features)
+    return model.predict(X_3d)
 
-shap_values = compute_shap(model, X_test_scaled)
+# Use a small background for speed
+background = X_test_scaled[np.random.choice(X_test_scaled.shape[0], 1, replace=False)]
+background_flat = background.reshape(background.shape[0], -1)
 
+explainer = shap.KernelExplainer(model_predict_wrapper, background_flat)
+
+# Sample some test data
+X_sample_flat = X_test_scaled[:10].reshape(10, -1)
+shap_values = explainer.shap_values(X_sample_flat)
+
+# -----------------------------
+# Plot SHAP summary
+# -----------------------------
 fig, ax = plt.subplots()
-shap.summary_plot(shap_values, X_test_scaled, feature_names=feature_cols, show=False)
+shap.summary_plot(shap_values, X_sample_flat, show=False)
 st.pyplot(fig)
 
 # Store SHAP values
