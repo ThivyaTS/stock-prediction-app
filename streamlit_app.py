@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+from sklearn.preprocessing import MinMaxScaler 
 import os
 from google import genai  # make sure google-genai>=0.11.0 is in requirements.txt
 
