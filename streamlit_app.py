@@ -120,70 +120,78 @@ with col2:
 
 
 import streamlit as st
-import pandas as pd
 import numpy as np
 from tensorflow.keras.models import load_model
 import shap
 import matplotlib.pyplot as plt
+import pandas as pd
 
 st.set_page_config(page_title="Stock Prediction Dashboard", layout="wide")
-
-st.title("Stock Prediction")
+st.title("📊 Stock Prediction & SHAP Explanation Dashboard")
 
 # -----------------------------
 # 1. Load test data & model
 # -----------------------------
-TEST_FILE_PATH = "X_test.csv"  # your test file path in Streamlit directory
-MODEL_PATH = "multivariate_lstm_model.keras"      # your trained model path
+X_TEST_PATH = "X_test_scaled.npy"
+Y_TEST_PATH = "y_test_scaled.npy"
+MODEL_PATH = "your_model.h5"
 
 @st.cache_data
-def load_data(file_path):
-    return pd.read_csv(file_path)
+def load_npy(path):
+    return np.load(path)
 
 @st.cache_resource
 def load_trained_model(path):
     return load_model(path)
 
-test_df = load_data(TEST_FILE_PATH)
+X_test_scaled = load_npy(X_TEST_PATH)
+y_test_scaled = load_npy(Y_TEST_PATH)
 model = load_trained_model(MODEL_PATH)
 
-feature_cols = [col for col in test_df.columns if col not in ['Close', 'Open']]
-X_test = test_df[feature_cols].values.reshape(test_df.shape[0], 1, len(feature_cols))
+feature_cols = [f"Feature_{i}" for i in range(X_test_scaled.shape[2])]
 
 # -----------------------------
 # 2. Make predictions
 # -----------------------------
-preds = model.predict(X_test)
+preds = model.predict(X_test_scaled)
+
+# Align Prev Close/Open as t-1
+prev_close = y_test_scaled[:-1, 0]  # t-1 Close
+prev_open  = y_test_scaled[:-1, 1]  # t-1 Open
+pred_close = preds[1:, 0]           # predicted Close at t
+pred_open  = preds[1:, 1]           # predicted Open at t
+
 results_df = pd.DataFrame({
-    "Prev Close": test_df['Close'],
-    "Prev Open": test_df['Open'],
-    "Pred Close": preds[:, 0],
-    "Pred Open": preds[:, 1]
+    "Prev Close": prev_close,
+    "Prev Open": prev_open,
+    "Pred Close": pred_close,
+    "Pred Open": pred_open
 })
 
-st.subheader("Predictions Table")
+st.subheader("Predictions Table (t-1 vs t)")
 st.dataframe(results_df)
 
 # -----------------------------
 # 3. Generate SHAP summary
 # -----------------------------
 st.subheader("SHAP Summary Plot")
+
 @st.cache_data
 def compute_shap(model, X):
     explainer = shap.KernelExplainer(model.predict, X)
     shap_values = explainer.shap_values(X)
     return shap_values
 
-shap_values = compute_shap(model, X_test)
+shap_values = compute_shap(model, X_test_scaled)
 
 fig, ax = plt.subplots()
-shap.summary_plot(shap_values, X_test, feature_names=feature_cols, show=False)
+shap.summary_plot(shap_values, X_test_scaled, feature_names=feature_cols, show=False)
 st.pyplot(fig)
 
-# Store SHAP values for LLM prompts
-shap_df = pd.DataFrame(np.array(shap_values).reshape(X_test.shape[0], len(feature_cols)), columns=feature_cols)
+# Store SHAP values
+shap_df = pd.DataFrame(np.array(shap_values).reshape(X_test_scaled.shape[0], X_test_scaled.shape[2]), columns=feature_cols)
 
-# Optional: save SHAP to Excel for download
+# Optional download
 shap_df.to_excel("shap_summary.xlsx", index=False)
 st.download_button("Download SHAP Summary", "shap_summary.xlsx")
 
@@ -193,22 +201,21 @@ st.download_button("Download SHAP Summary", "shap_summary.xlsx")
 st.subheader("LLM Explanation")
 topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
 
-# Generate top features automatically
+# Choose top features based on SHAP for selected target
 if topic == "Predicted Close":
     top_features = shap_df.mean().sort_values(ascending=False).head(5)
 else:
     top_features = shap_df.mean().sort_values(ascending=False).head(5)  # adjust logic if needed
 
-# Build LLM prompt
+# Build LLM prompt automatically
 prompt = f"Explain how the following features contribute to {topic} prediction:\n"
 for feature, value in top_features.items():
     prompt += f"- {feature}: average SHAP value {value:.4f}\n"
 
-# Display prompt (for now) and call your LLM integration
+# Display prompt
 st.text_area("LLM Prompt", prompt, height=200)
 
-# Example placeholder for your LLM integration
-# Replace the next lines with your LLM API call
+# Placeholder for actual LLM integration
 # llm_response = your_llm_api_call(prompt)
 # st.subheader("LLM Explanation")
 # st.write(llm_response)
