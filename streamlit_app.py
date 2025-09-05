@@ -1,21 +1,39 @@
 import streamlit as st
 import os
-from google.genai import Client
+from google import genai  # make sure google-genai>=0.11.0 is in requirements.txt
 
-import streamlit as st
-import os
-import requests
-import json
+st.title("Gemini 2.5 Flash Content Generator")
 
-from google import genai
+# --- Get API key from environment variable or Streamlit secrets ---
+API_KEY = os.getenv("GEMINI_API_KEY")
+if not API_KEY:
+    st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
+    st.stop()
 
-# The client gets the API key from the environment variable `GEMINI_API_KEY`.
-client = genai.Client()
+# Initialize Gemini client
+client = genai.Client(api_key=API_KEY)
 
-response = client.models.generate_content(
-    model="gemini-2.5-flash", contents="Explain how AI works in a few words"
-)
-print(response.text)
+# User input: dropdown or text
+topic = st.selectbox("Choose a topic:", ["Artificial Intelligence", "Stock Market", "Crypto", "Finance"])
+user_prompt = st.text_area("Or enter your own prompt:")
+
+if st.button("Generate Content"):
+    # Construct the prompt
+    prompt_text = user_prompt if user_prompt else f"Explain {topic} in a few words"
+
+    try:
+        # Generate content using Gemini 2.5 Flash
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt_text
+        )
+
+        # Display the result
+        st.subheader("Generated Content")
+        st.write(response.text)
+
+    except Exception as e:
+        st.error(f"Error generating content: {e}")
 
 
 # import os
