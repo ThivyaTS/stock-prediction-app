@@ -6,5 +6,7 @@ seaborn
 pandas
 numpy
 plotly>=5.0.0
-openai
-python-dotenv
+streamlit
+ollama
+python-dotenv   # optional, only if you plan to use .env for config
+
