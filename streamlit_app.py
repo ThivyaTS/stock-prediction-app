@@ -1,46 +1,29 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Configure the Gemini API with your key from Streamlit secrets
-try:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-except KeyError:
-    st.error("API key not found. Please add your GEMINI_API_KEY to the Streamlit secrets.")
-    st.stop()
+import google.generativeai as genai
 
-# Set up the model for chat
-# For a full list of models, run: for m in genai.list_models(): print(m.name)
+# Your prepared SHAP summary string from the previous step
+# For example:
+# shap_summary_string = "feature      importance\n0      Age        0.25\n1  Education    0.18\n..."
+
+# Construct the full prompt
+prompt = f"""
+I have a machine learning model's feature importance data in SHAP summary format. 
+Please explain the feature importance in simple English for a non-technical audience. 
+Highlight the top 3 most important features and what they mean.
+
+Here is the SHAP summary data:
+{y_test.csv}
+"""
+
+# Call the Gemini model
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 model = genai.GenerativeModel('gemini-pro')
+response = model.generate_content(prompt)
 
-# Set the page title and a heading for the app
-st.title("My Gemini Chatbot")
-st.header("Ask me anything!")
-
-# Initialize chat history in Streamlit's session state
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# Accept user input
-if prompt := st.chat_input("What do you want to know?"):
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    # Display user message in chat message container
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    # Display assistant response in chat message container
-    with st.chat_message("assistant"):
-        # Use the Gemini model to generate a response
-        response = model.generate_content(prompt)
-        st.markdown(response.text)
-    
-    # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response.text})
+# Display the response in your Streamlit dashboard
+st.markdown(response.text)
 
 # import os
 # import logging
