@@ -1,11 +1,12 @@
-import os
 import streamlit as st
-from openai import OpenAI
+from ollama import Ollama
 
-# Initialize client
-client = OpenAI(api_key="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") 
-st.title("💬 LLM Chatbot with Streamlit")
+# Initialize Ollama client
+client = Ollama()
 
+st.title("💬 LLaMA 3.2 Chatbot")
+
+# Store chat history
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
@@ -20,20 +21,17 @@ if prompt := st.chat_input("Ask me anything..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Call new OpenAI API
+    # Call Ollama LLaMA 3.2
     with st.chat_message("assistant"):
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=st.session_state["messages"],
-            max_tokens=500
+        response = client.chat(
+            model="llama3.2:latest",
+            messages=st.session_state["messages"]
         )
-        answer = response.choices[0].message.content
+        answer = response["content"]
         st.markdown(answer)
 
+    # Save assistant response
     st.session_state["messages"].append({"role": "assistant", "content": answer})
-
-
-
 
 # import os
 # import logging
