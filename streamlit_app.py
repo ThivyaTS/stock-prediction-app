@@ -14,7 +14,7 @@ Please explain the feature importance in simple English for a non-technical audi
 Highlight the top 3 most important features and what they mean.
 
 Here is the SHAP summary data:
-{y_test.csv}
+{'hey'}
 """
 
 # Call the Gemini model
