@@ -171,6 +171,9 @@ y_pred_scaled = model.predict(X_input)
 y_pred = target_scaler.inverse_transform(y_pred_scaled)
 predicted_close = y_pred[0][0]
 
+# Set predicted date (skip weekend)
+last_date = dataFrame['Date'].iloc[-1]  # 2024-10-11
+pred_date = last_date + timedelta(days=3)  # Monday, 2024-10-14
 # -----------------------------
 # Visualization
 # -----------------------------
@@ -185,7 +188,7 @@ fig.add_trace(go.Scatter(
 ))
 
 # Plot predicted next day
-pred_date = dataFrame.index[-1] + pd.Timedelta(days=1)
+# pred_date = dataFrame.index[-1] + pd.Timedelta(days=1)
 fig.add_trace(go.Scatter(
     x=[pred_date],
     y=[predicted_close],
