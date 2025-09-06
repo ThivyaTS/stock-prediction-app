@@ -124,77 +124,11 @@ with col2:
 
 
 
-import streamlit as st
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import shap
-import pickle
-from tensorflow.keras.models import load_model
 
-st.set_page_config(page_title="Stock Prediction Dashboard", layout="wide")
-st.title("📊 Stock Prediction & SHAP Explanation Dashboard")
 
-# -----------------------------
-# 1. Load test data, scaler & model
-# -----------------------------
-X_TEST_PATH = "X_test_scaled.npy"
-Y_TEST_PATH = "y_test_scaled.npy"
-MODEL_PATH = "trained_model_aapl.h5"
 
-@st.cache_data
-def load_npy(path):
-    return np.load(path)
 
-@st.cache_resource
-def load_trained_model(path):
-    return load_model(path)
 
-import joblib
-target_scaler = joblib.load("target_scaler.pkl")
-
-    
-
-X_test_scaled = load_npy(X_TEST_PATH)
-y_test_scaled = load_npy(Y_TEST_PATH)
-model = load_trained_model(MODEL_PATH)
-# target_scaler = MinMaxScaler(feature_range=(0, 1))
-
-feature_cols = [f"Feature_{i}" for i in range(X_test_scaled.shape[2])]
-
-# -----------------------------
-# 2. Make predictions
-# -----------------------------
-preds_scaled = model.predict(X_test_scaled)
-
-# -----------------------------
-# 3. Inverse transform scaled values
-# -----------------------------
-# Reshape if needed (2D: samples x 2)
-preds_reshaped = preds_scaled.reshape(-1, 2)
-y_test_reshaped = y_test_scaled.reshape(-1, 2)
-
-# Inverse transform
-preds_real = target_scaler.inverse_transform(preds_reshaped)
-y_test_real = target_scaler.inverse_transform(y_test_reshaped)
-
-# -----------------------------
-# 4. Create predictions table (t-1 alignment)
-# -----------------------------
-prev_close = y_test_real[:-1, 0]  # t-1 Close
-prev_open  = y_test_real[:-1, 1]  # t-1 Open
-pred_close = preds_real[1:, 0]    # predicted Close at t
-pred_open  = preds_real[1:, 1]    # predicted Open at t
-
-results_df = pd.DataFrame({
-    "Prev Close": prev_close,
-    "Prev Open": prev_open,
-    "Pred Close": pred_close,
-    "Pred Open": pred_open
-})
-
-st.subheader("Predictions Table (t-1 vs t, real prices)")
-st.dataframe(results_df)
 
 # -----------------------------
 # 6. LLM topic selection & prompt
