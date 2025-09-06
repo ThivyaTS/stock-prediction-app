@@ -111,7 +111,7 @@ st.plotly_chart(fig1, use_container_width=True)
 window = 20
 
 # Select last 20 rows (excluding Date if already dropped)
-latest_data = dataFrame[-window:].copy()
+latest_data = data[-window:].copy()
 
 
 # Load feature scaler
@@ -126,13 +126,13 @@ if 'Date' in latest_data.columns:
 # Impute missing values (if any)
 from sklearn.impute import SimpleImputer
 imputer = SimpleImputer()
-latest_scaled = pd.DataFrame(
+latest_scaled = pd.data(
     imputer.fit_transform(latest_data),
     columns=latest_data.columns
 )
 
 # Scale features
-latest_scaled = pd.DataFrame(
+latest_scaled = pd.data(
     feature_scaler.transform(latest_scaled),
     columns=latest_scaled.columns
 )
@@ -155,8 +155,8 @@ print("Predicted Close price for next day:", y_pred[0][0])
 import plotly.graph_objects as go
 
 # Last 20 actual Close values
-dates = dataFrame.index[-window:]
-actual_close = dataFrame['Close'][-window:]
+dates = data.index[-window:]
+actual_close = data['Close'][-window:]
 
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=dates, y=actual_close, mode='lines', name='Actual Close'))
