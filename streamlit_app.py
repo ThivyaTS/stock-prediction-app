@@ -408,7 +408,7 @@ prompt = f"Explain how the following features contribute to {topic} prediction:\
 
 st.text_area("LLM Prompt", prompt, height=200)
 
-Placeholder for LLM integration
+# Placeholder for LLM integration
 llm_response = your_llm_api_call(prompt)
 st.subheader("LLM Explanation")
 st.write(llm_response)
