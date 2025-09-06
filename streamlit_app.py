@@ -57,7 +57,7 @@ col1, col2 = st.columns([4, 2])  # left column bigger
 with col1:
     st.subheader(f"{selected_ticker} Close Prices")
     
-    fig1 = go.Figure()w
+    fig1 = go.Figure()
     fig1.add_trace(go.Scatter(
         x=ticker_data['Date'],
         y=ticker_data['Close'],
