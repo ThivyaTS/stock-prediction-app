@@ -207,17 +207,17 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}**")
 
-fig1.add_trace(go.Scatter(
-    x=[pred_date],
-    y=[predicted_close],
-    mode='markers+text',
-    name='Predicted Close',
-    marker=dict(color='red', size=10),
-    text=[f"{predicted_close:.2f}"],
-    textposition="top center"
-))
+# fig1.add_trace(go.Scatter(
+#     x=[pred_date],
+#     y=[predicted_close],
+#     mode='markers+text',
+#     name='Predicted Close',
+#     marker=dict(color='red', size=10),
+#     text=[f"{predicted_close:.2f}"],
+#     textposition="top center"
+# ))
 
-st.plotly_chart(fig1, use_container_width=True)
+# st.plotly_chart(fig1, use_container_width=True)
 
 
 
