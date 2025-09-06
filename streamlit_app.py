@@ -108,17 +108,65 @@ st.plotly_chart(fig1, use_container_width=True)
 #     )
     
 #     st.plotly_chart(fig2, use_container_width=True)
+window = 20
+
+# Select last 20 rows (excluding Date if already dropped)
+latest_data = dataFrame[-window:].copy()
 
 
+# Load feature scaler
 import joblib
-from tensorflow import keras
-
-# Load LSTM model
-model = keras.models.load_model("multivariate_lstm_model_aapl.keras")
-
-# Load scalers
 feature_scaler = joblib.load("feature_scaler_aapl.save")
 target_scaler = joblib.load("target_scaler_aapl.save")
+
+# Drop Date if present
+if 'Date' in latest_data.columns:
+    latest_data = latest_data.drop(columns=['Date'])
+
+# Impute missing values (if any)
+from sklearn.impute import SimpleImputer
+imputer = SimpleImputer()
+latest_scaled = pd.DataFrame(
+    imputer.fit_transform(latest_data),
+    columns=latest_data.columns
+)
+
+# Scale features
+latest_scaled = pd.DataFrame(
+    feature_scaler.transform(latest_scaled),
+    columns=latest_scaled.columns
+)
+
+import numpy as np
+
+X_input = latest_scaled.values.reshape(1, window, latest_scaled.shape[1])
+
+from tensorflow import keras
+
+model = keras.models.load_model("multivariate_lstm_model_aapl.keras")
+
+# Predict scaled Close
+y_pred_scaled = model.predict(X_input)
+
+# Inverse scale to original price
+y_pred = target_scaler.inverse_transform(y_pred_scaled)
+print("Predicted Close price for next day:", y_pred[0][0])
+
+import plotly.graph_objects as go
+
+# Last 20 actual Close values
+dates = dataFrame.index[-window:]
+actual_close = dataFrame['Close'][-window:]
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=dates, y=actual_close, mode='lines', name='Actual Close'))
+
+# Next predicted day
+pred_date = dates[-1] + pd.Timedelta(days=1)
+fig.add_trace(go.Scatter(x=[pred_date], y=[y_pred[0][0]], mode='markers', name='Predicted Close', marker=dict(color='red', size=10)))
+
+fig.update_layout(title='Latest Close Prices + Prediction', xaxis_title='Date', yaxis_title='Close Price')
+st.plotly_chart(fig, use_container_width=True)
 
 
 
