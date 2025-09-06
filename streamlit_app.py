@@ -173,7 +173,7 @@ predicted_close = y_pred[0][0]
 from datetime import timedelta
 
 # Ensure last_date is a Timestamp
-last_date = pd.to_datetime(data.index[-1])
+last_date = pd.to_datetime(dataFrame.index[-1])
 
 # Add 3 days to skip weekend
 pred_date = last_date + timedelta(days=3)
