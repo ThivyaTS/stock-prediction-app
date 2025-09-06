@@ -227,11 +227,11 @@ st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}
 # SHAP KernelExplainer
 # -----------------------------
 # Flatten input for KernelExplainer
-X_input_flat = X_input.reshape(1, window * num_features)
+X_input_flat = X_input.reshape(X_input.shape[0], -1)
 
 # Prepare dynamic background from training data
 num_background = min(50, X_train.shape[0])
-background = X_train[-num_background:].reshape(num_background, window * num_features)
+background = X_train[-num_background:].reshape(num_background, -1)
 
 # Define prediction function for SHAP
 def model_predict(input_2d):
