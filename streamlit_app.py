@@ -59,13 +59,13 @@ with col1:
     
     fig1 = go.Figure()
     fig1.add_trace(go.Scatter(
-        x=ticker_data['Date'],
-        y=ticker_data['Close'],
+        x=data['Date'],
+        y=data['Close'],
         mode='lines',
         name='Close'
     ))
 
-    max_date = ticker_data['Date'].max()
+    max_date = data['Date'].max()
 
     fig1.update_layout(
         title="Close Prices",
@@ -82,7 +82,7 @@ with col1:
         ),
         rangeslider=dict(visible=False),  # optional
         type="date",
-        range=[ticker_data['Date'].min(), max_date]  # show only dataset range
+        range=[data['Date'].min(), max_date]  # show only dataset range
     ),
 
     template='plotly_white',
