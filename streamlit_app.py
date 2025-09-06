@@ -413,12 +413,6 @@ llm_response = your_llm_api_call(prompt)
 st.subheader("LLM Explanation")
 st.write(llm_response)
 
-Placeholder for actual LLM integration
-llm_response = your_llm_api_call(prompt)
-st.subheader("LLM Explanation")
-st.write(llm_response)
-
-
 User input: dropdown or text
 topic = st.selectbox("Choose a topic:", ["Artificial Intelligence", "Stock Market", "Crypto", "Finance"])
 user_prompt = st.text_area("Or enter your own prompt:")
