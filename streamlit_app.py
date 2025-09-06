@@ -229,19 +229,28 @@ st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}
 import shap
 import numpy as np
 
-# Use the last 50 samples of your scaled data as background (or smaller if memory constrained)
-background = X_input  # shape: (1, 20, num_features)
+# Flatten the input for LSTM: (samples, timesteps*features)
+window, num_features = X_input.shape[1], X_input.shape[2]
+X_input_flat = X_input.reshape(1, window * num_features)
 
-# Create the DeepExplainer
-explainer = shap.DeepExplainer(model, background)
+# Use some background samples from your scaled training data
+# Here we use the last 50 windows from training/test data (reshaped)
+background = X_train[-50:].reshape(50, window * num_features)
 
-# Compute SHAP values for the input you just predicted
-shap_values = explainer.shap_values(X_input)  # Returns a list if multiple outputs
+def model_predict(input_2d):
+    # input_2d shape: (samples, window*num_features)
+    input_3d = input_2d.reshape(input_2d.shape[0], window, num_features)
+    pred_scaled = model.predict(input_3d)
+    # Inverse scale
+    pred = target_scaler.inverse_transform(pred_scaled)
+    return pred
 
-# shap_values[0] shape: (1, window, num_features)
-shap_values_array = shap_values[0][0]  # remove batch dimension -> (window, num_features)
+explainer = shap.KernelExplainer(model_predict, background)
+shap_values = explainer.shap_values(X_input_flat)
+# shap_values shape: (1, window*num_features)
+shap_values_array = shap_values[0].reshape(window, num_features)
 
-# Sum absolute SHAP values over timesteps
+# Sum absolute SHAP values across timesteps
 feature_importance = np.abs(shap_values_array).sum(axis=0)
 
 # Map to feature names
@@ -250,10 +259,9 @@ shap_summary = dict(zip(feature_names, feature_importance))
 
 # Sort descending
 shap_summary_sorted = dict(sorted(shap_summary.items(), key=lambda x: x[1], reverse=True))
-
 import os
 import streamlit as st
-import genai  # assuming Gemini API client
+import genai
 
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
@@ -263,9 +271,8 @@ if not API_KEY:
 client = genai.Client(api_key=API_KEY)
 
 st.subheader("LLM Explanation")
-topic = st.selectbox("Select explanation topic:", ["Predicted Close"])
+topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
 
-# Convert SHAP summary to text
 shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
 prompt = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
 
