@@ -223,34 +223,139 @@ st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}
 
 # st.plotly_chart(fig1, use_container_width=True)
 
+import streamlit as st
+import pandas as pd
+import numpy as np
+import os
+from datetime import timedelta
+from sklearn.impute import SimpleImputer
+import shap
+from tensorflow import keras
+import genai
+import plotly.graph_objects as go
+import joblib
+
+# -----------------------------
+# Load model and scalers
+# -----------------------------
+model = keras.models.load_model("multivariate_lstm_model_aapl.keras")
+feature_scaler = joblib.load("feature_scaler_aapl.save")
+target_scaler = joblib.load("target_scaler_aapl.save")
+
+# -----------------------------
+# Load dataset
+# -----------------------------
+@st.cache_data
+def load_data():
+    data = pd.read_csv("dataFrame no last 5 rows.csv")
+    data['Date'] = pd.to_datetime(data['Date'])
+    data.set_index('Date', inplace=True)
+    return data
+
+data = load_data()
+
+# -----------------------------
+# Prepare latest input for prediction
+# -----------------------------
+window = 20
+latest_data = data[-window:].copy()
+
+# Drop non-numeric columns
+non_numeric_cols = latest_data.select_dtypes(exclude='number').columns
+latest_data_numeric = latest_data.drop(columns=non_numeric_cols)
+
+# Impute missing values
+imputer = SimpleImputer()
+latest_scaled = pd.DataFrame(
+    imputer.fit_transform(latest_data_numeric),
+    columns=latest_data_numeric.columns
+)
+
+# Scale features
+latest_scaled = pd.DataFrame(
+    feature_scaler.transform(latest_scaled),
+    columns=latest_scaled.columns
+)
+
+# Reshape for LSTM input
+X_input = latest_scaled.values.reshape(1, window, latest_scaled.shape[1])
+num_features = X_input.shape[2]
+
+# -----------------------------
+# Predict next Close
+# -----------------------------
+y_pred_scaled = model.predict(X_input)
+predicted_close = target_scaler.inverse_transform(y_pred_scaled)[0][0]
+
+# Next trading day (skip weekend)
+last_date = pd.to_datetime(data.index[-1])
+pred_date = last_date + timedelta(days=3)  # Friday → Monday
+
+# -----------------------------
+# Plot actual + predicted Close
+# -----------------------------
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=data.index,
+    y=data['Close'],
+    mode='lines',
+    name='Actual Close'
+))
+fig.add_trace(go.Scatter(
+    x=[pred_date],
+    y=[predicted_close],
+    mode='markers+text',
+    name='Predicted Close',
+    marker=dict(color='red', size=10),
+    text=[f"{predicted_close:.2f}"],
+    textposition="top center"
+))
+st.plotly_chart(fig, use_container_width=True)
+
+# -----------------------------
+# Prepare background for Kernel SHAP
+# -----------------------------
+# Scale entire dataset
+data_numeric = data.drop(columns=non_numeric_cols)
+df_scaled = pd.DataFrame(feature_scaler.transform(data_numeric), columns=data_numeric.columns)
+
+# Generate all sliding windows
+def singleStepSampler(df, window):
+    xRes = []
+    for i in range(0, len(df) - window):
+        res = []
+        for j in range(window):
+            r = []
+            for col in df.columns:
+                r.append(df[col].iloc[i + j])
+            res.append(r)
+        xRes.append(res)
+    return np.array(xRes)
+
+X_all = singleStepSampler(df_scaled, window)
+
+# Dynamic background
+num_background = min(50, X_all.shape[0])
+background = X_all[-num_background:].reshape(num_background, -1)  # flatten for KernelExplainer
+
+# Flatten latest input
+X_input_flat = X_input.reshape(X_input.shape[0], -1)
+
 # -----------------------------
 # SHAP KernelExplainer
 # -----------------------------
-# Flatten input for KernelExplainer
-X_input_flat = X_input.reshape(X_input.shape[0], -1)
-
-# Prepare dynamic background from training data
-num_background = min(50, X_train.shape[0])
-background = X_train[-num_background:].reshape(num_background, -1)
-
-# Define prediction function for SHAP
 def model_predict(input_2d):
     input_3d = input_2d.reshape(input_2d.shape[0], window, num_features)
     pred_scaled = model.predict(input_3d)
     pred = target_scaler.inverse_transform(pred_scaled)
     return pred
 
-# Initialize KernelExplainer
 explainer = shap.KernelExplainer(model_predict, background)
-
-# Compute SHAP values for latest input
 shap_values = explainer.shap_values(X_input_flat)
 
-# Aggregate SHAP over timesteps
+# Aggregate SHAP values per feature
 shap_values_array = shap_values[0].reshape(window, num_features)
 feature_importance = np.abs(shap_values_array).sum(axis=0)
-
-# Map to feature names
 feature_names = latest_scaled.columns
 shap_summary = dict(zip(feature_names, feature_importance))
 shap_summary_sorted = dict(sorted(shap_summary.items(), key=lambda x: x[1], reverse=True))
@@ -273,7 +378,6 @@ prompt = f"Explain how the following features contributed to {topic} prediction:
 
 st.text_area("LLM Prompt", prompt, height=200)
 
-# Call LLM
 response = client.generate(
     model="gemini-pro-1",
     prompt=prompt,
