@@ -172,9 +172,12 @@ y_pred = target_scaler.inverse_transform(y_pred_scaled)
 predicted_close = y_pred[0][0]
 from datetime import timedelta
 
-# Set predicted date (skip weekend)
-last_date = last_date = data.index[-1] # 2024-10-11
-pred_date = last_date + timedelta(days=3)  # Monday, 2024-10-14
+# Ensure last_date is a Timestamp
+last_date = pd.to_datetime(data.index[-1])
+
+# Add 3 days to skip weekend
+pred_date = last_date + timedelta(days=3)
+
 # -----------------------------
 # Visualization
 # -----------------------------
