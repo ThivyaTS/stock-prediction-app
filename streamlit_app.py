@@ -430,7 +430,7 @@ if st.button("Generate Content"):
     try:
         # Generate content using Gemini 2.5 Flash
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.0-flash",
             contents=prompt_text
         )
 
