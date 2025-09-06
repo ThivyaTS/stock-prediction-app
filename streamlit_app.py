@@ -392,6 +392,10 @@ shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
 # LLM topic selection & prompt
 # -----------------------------
 
+import streamlit as st
+import os
+import google.generativeai as genai
+
 # --- Get API key from environment variable or Streamlit secrets ---
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
@@ -401,30 +405,30 @@ if not API_KEY:
 # Initialize Gemini client
 client = genai.Client(api_key=API_KEY)
 
-st.subheader("LLM Explanation")
-topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
+st.title("Stock Prediction LLM Explainer")
 
-prompt = f"Explain how the following features contribute to {topic} prediction:\n"
-
-st.text_area("LLM Prompt", prompt, height=200)
-
-# Placeholder for LLM integration
-llm_response = your_llm_api_call(prompt)
-st.subheader("LLM Explanation")
-st.write(llm_response)
-
-User input: dropdown or text
-topic = st.selectbox("Choose a topic:", ["Artificial Intelligence", "Stock Market", "Crypto", "Finance"])
+# User input: dropdown or text
+topic = st.selectbox("Choose a topic:", ["Predicted Close", "Predicted Open", "Artificial Intelligence", "Stock Market", "Crypto", "Finance"])
 user_prompt = st.text_area("Or enter your own prompt:")
+
+# Placeholder for SHAP text. You must populate this variable with your SHAP explanation text.
+shap_text = "Example SHAP explanation text. You need to replace this with your actual SHAP data."
 
 if st.button("Generate Content"):
     # Construct the prompt
-    prompt_text = user_prompt if user_prompt else f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
+    if user_prompt:
+        prompt_text = user_prompt
+    else:
+        # Check if topic is a stock prediction type and use shap_text
+        if topic in ["Predicted Close", "Predicted Open"]:
+            prompt_text = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
+        else:
+            prompt_text = f"Explain {topic}." # A simple prompt for general topics
 
     try:
-        # Generate content using Gemini 1.5 Flash (or the correct model name)
+        # Generate content using Gemini 1.5 Flash
         response = client.generate_content(
-            model="gemini-2.0-flash",  # Corrected method call and a common model name
+            model="gemini-1.5-flash",
             contents=prompt_text
         )
 
