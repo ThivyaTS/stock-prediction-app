@@ -38,13 +38,6 @@ def load_data():
     return data
 
 data = load_data()
-# -------------------------
-# Select ticker
-# -------------------------
-tickers = data['Ticker']
-selected_ticker = st.selectbox("Select Ticker", tickers)
-
-ticker_data = data[data['Ticker'] == selected_ticker]
 
 # -------------------------
 # Create side-by-side columns
@@ -55,7 +48,7 @@ col1, col2 = st.columns([4, 2])  # left column bigger
 # Left Column: Open & Close Prices
 # -------------------------
 with col1:
-    st.subheader(f"{selected_ticker} Close Prices")
+    st.subheader("AAPL Close Prices")
     
     fig1 = go.Figure()
     fig1.add_trace(go.Scatter(
@@ -65,7 +58,7 @@ with col1:
         name='Close'
     ))
 
-    max_date = data['Date'].max()
+    # max_date = data['Date'].max()
 
     fig1.update_layout(
         title="Close Prices",
@@ -87,8 +80,8 @@ with col1:
 
     template='plotly_white',
     height=500 
-)
-    st.plotly_chart(fig1, use_container_width=True)
+) 
+st.plotly_chart(fig1, use_container_width=True)
 
 # # -------------------------
 # # Right Column: Volume
