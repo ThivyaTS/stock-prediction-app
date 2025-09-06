@@ -170,6 +170,7 @@ X_input = latest_scaled.values.reshape(1, window, latest_scaled.shape[1])
 y_pred_scaled = model.predict(X_input)
 y_pred = target_scaler.inverse_transform(y_pred_scaled)
 predicted_close = y_pred[0][0]
+from datetime import timedelta
 
 # Set predicted date (skip weekend)
 last_date = last_date = data.index[-1] # 2024-10-11
