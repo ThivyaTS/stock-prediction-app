@@ -223,30 +223,84 @@ st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}
 
 # st.plotly_chart(fig1, use_container_width=True)
 
-
-
-
-
-
 # -----------------------------
-# 6. LLM topic selection & prompt
+# Shap Explainer
 # -----------------------------
+import shap
+import numpy as np
 
-# --- Get API key from environment variable or Streamlit secrets ---
+# Use the last 50 samples of your scaled data as background (or smaller if memory constrained)
+background = X_input  # shape: (1, 20, num_features)
+
+# Create the DeepExplainer
+explainer = shap.DeepExplainer(model, background)
+
+# Compute SHAP values for the input you just predicted
+shap_values = explainer.shap_values(X_input)  # Returns a list if multiple outputs
+
+# shap_values[0] shape: (1, window, num_features)
+shap_values_array = shap_values[0][0]  # remove batch dimension -> (window, num_features)
+
+# Sum absolute SHAP values over timesteps
+feature_importance = np.abs(shap_values_array).sum(axis=0)
+
+# Map to feature names
+feature_names = latest_scaled.columns
+shap_summary = dict(zip(feature_names, feature_importance))
+
+# Sort descending
+shap_summary_sorted = dict(sorted(shap_summary.items(), key=lambda x: x[1], reverse=True))
+
+import os
+import streamlit as st
+import genai  # assuming Gemini API client
+
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
     st.stop()
 
-# Initialize Gemini client
 client = genai.Client(api_key=API_KEY)
 
 st.subheader("LLM Explanation")
-topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
+topic = st.selectbox("Select explanation topic:", ["Predicted Close"])
 
-prompt = f"Explain how the following features contribute to {topic} prediction:\n"
+# Convert SHAP summary to text
+shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
+prompt = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
 
 st.text_area("LLM Prompt", prompt, height=200)
+
+# --- Optionally call the LLM ---
+response = client.generate(
+    model="gemini-pro-1",
+    prompt=prompt,
+    max_output_tokens=300
+)
+
+st.text_area("LLM Response", response.text, height=300)
+
+
+
+# -----------------------------
+# LLM topic selection & prompt
+# -----------------------------
+
+# # --- Get API key from environment variable or Streamlit secrets ---
+# API_KEY = os.getenv("GEMINI_API_KEY")
+# if not API_KEY:
+#     st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
+#     st.stop()
+
+# # Initialize Gemini client
+# client = genai.Client(api_key=API_KEY)
+
+# st.subheader("LLM Explanation")
+# topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
+
+# prompt = f"Explain how the following features contribute to {topic} prediction:\n"
+
+# st.text_area("LLM Prompt", prompt, height=200)
 
 # Placeholder for LLM integration
 # llm_response = your_llm_api_call(prompt)
