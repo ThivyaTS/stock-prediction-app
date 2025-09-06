@@ -368,7 +368,7 @@ if not API_KEY:
     st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
     st.stop()
 
- client = genai.Client(api_key=API_KEY)
+client = genai.Client(api_key=API_KEY)
 
 st.subheader("LLM Explanation")
 topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
