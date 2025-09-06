@@ -224,45 +224,40 @@ st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}
 # st.plotly_chart(fig1, use_container_width=True)
 
 # -----------------------------
-# Shap Explainer
+# SHAP KernelExplainer
 # -----------------------------
-import shap
-import numpy as np
-
-# Flatten the input for LSTM: (samples, timesteps*features)
-window, num_features = X_input.shape[1], X_input.shape[2]
+# Flatten input for KernelExplainer
 X_input_flat = X_input.reshape(1, window * num_features)
 
-# Use some background samples from your scaled training data
-# Here we use the last 50 windows from training/test data (reshaped)
-background = X_train[-50:].reshape(50, window * num_features)
+# Prepare dynamic background from training data
+num_background = min(50, X_train.shape[0])
+background = X_train[-num_background:].reshape(num_background, window * num_features)
 
+# Define prediction function for SHAP
 def model_predict(input_2d):
-    # input_2d shape: (samples, window*num_features)
     input_3d = input_2d.reshape(input_2d.shape[0], window, num_features)
     pred_scaled = model.predict(input_3d)
-    # Inverse scale
     pred = target_scaler.inverse_transform(pred_scaled)
     return pred
 
+# Initialize KernelExplainer
 explainer = shap.KernelExplainer(model_predict, background)
-shap_values = explainer.shap_values(X_input_flat)
-# shap_values shape: (1, window*num_features)
-shap_values_array = shap_values[0].reshape(window, num_features)
 
-# Sum absolute SHAP values across timesteps
+# Compute SHAP values for latest input
+shap_values = explainer.shap_values(X_input_flat)
+
+# Aggregate SHAP over timesteps
+shap_values_array = shap_values[0].reshape(window, num_features)
 feature_importance = np.abs(shap_values_array).sum(axis=0)
 
 # Map to feature names
 feature_names = latest_scaled.columns
 shap_summary = dict(zip(feature_names, feature_importance))
-
-# Sort descending
 shap_summary_sorted = dict(sorted(shap_summary.items(), key=lambda x: x[1], reverse=True))
-import os
-import streamlit as st
-import genai
 
+# -----------------------------
+# LLM Explanation
+# -----------------------------
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
@@ -278,7 +273,7 @@ prompt = f"Explain how the following features contributed to {topic} prediction:
 
 st.text_area("LLM Prompt", prompt, height=200)
 
-# --- Optionally call the LLM ---
+# Call LLM
 response = client.generate(
     model="gemini-pro-1",
     prompt=prompt,
@@ -286,8 +281,6 @@ response = client.generate(
 )
 
 st.text_area("LLM Response", response.text, height=300)
-
-
 
 # -----------------------------
 # LLM topic selection & prompt
