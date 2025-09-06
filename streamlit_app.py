@@ -232,7 +232,6 @@ from datetime import timedelta
 from sklearn.impute import SimpleImputer
 import shap
 from tensorflow import keras
-import genai
 import plotly.graph_objects as go
 import joblib
 
