@@ -41,7 +41,7 @@ data = load_data()
 # -------------------------
 # Select ticker
 # -------------------------
-tickers = data['Ticker'].unique()
+tickers = data['Ticker']
 selected_ticker = st.selectbox("Select Ticker", tickers)
 
 ticker_data = data[data['Ticker'] == selected_ticker]
