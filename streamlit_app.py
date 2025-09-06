@@ -75,7 +75,7 @@ with col1:
         ),
         rangeslider=dict(visible=False),  # optional
         type="date",
-        range=[data['Date'].min(), max_date]  # show only dataset range
+        # range=[data['Date'].min(), max_date]  # show only dataset range
     ),
 
     template='plotly_white',
