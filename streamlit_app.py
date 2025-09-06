@@ -38,6 +38,7 @@ def load_data():
     return data
 
 data = load_data()
+data['Date'] = pd.to_datetime(data['Date'])
 
 # -------------------------
 # Create side-by-side columns
