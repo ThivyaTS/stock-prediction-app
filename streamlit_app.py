@@ -379,7 +379,7 @@ prompt = f"Explain how the following features contributed to {topic} prediction:
 st.text_area("LLM Prompt", prompt, height=200)
 
 response = client.generate(
-    model="gemini-pro-1",
+    model="gemini-2.5-flash",
     prompt=prompt,
     max_output_tokens=300
 )
