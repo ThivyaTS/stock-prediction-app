@@ -35,18 +35,16 @@ st.title("Stock Price Visualization")
 @st.cache_data  # caches the dataset for faster reload
 def load_data():
     data = pd.read_csv("dataFrame no last 5 rows.csv")
-    data1 = pd.read_csv("stock_df.csv")# replace with your CSV path
     return data
 
 data = load_data()
-data1 = load_data()
 # -------------------------
 # Select ticker
 # -------------------------
-tickers = data1['Ticker'].unique()
+tickers = data['Ticker'].unique()
 selected_ticker = st.selectbox("Select Ticker", tickers)
 
-ticker_data = data1[data1['Ticker'] == selected_ticker]
+ticker_data = data[data['Ticker'] == selected_ticker]
 
 # -------------------------
 # Create side-by-side columns
