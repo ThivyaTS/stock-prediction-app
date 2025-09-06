@@ -363,78 +363,80 @@ shap_summary_sorted = dict(sorted(shap_summary.items(), key=lambda x: x[1], reve
 # -----------------------------
 # LLM Explanation
 # -----------------------------
-API_KEY = os.getenv("GEMINI_API_KEY")
-if not API_KEY:
-    st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
-    st.stop()
-
-client = genai.Client(api_key=API_KEY)
-
-st.subheader("LLM Explanation")
-topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
 
 shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
-prompt = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
-
-st.text_area("LLM Prompt", prompt, height=200)
-
-response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents=prompt,
-    max_output_tokens=300
-)
-
-st.text_area("LLM Response", response.text, height=300)
-
-# -----------------------------
-# LLM topic selection & prompt
-# -----------------------------
-
-# # --- Get API key from environment variable or Streamlit secrets ---
+# prompt_text = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
 # API_KEY = os.getenv("GEMINI_API_KEY")
 # if not API_KEY:
 #     st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
 #     st.stop()
 
-# # Initialize Gemini client
 # client = genai.Client(api_key=API_KEY)
 
 # st.subheader("LLM Explanation")
 # topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
 
-# prompt = f"Explain how the following features contribute to {topic} prediction:\n"
+
 
 # st.text_area("LLM Prompt", prompt, height=200)
 
-# Placeholder for LLM integration
-# llm_response = your_llm_api_call(prompt)
-# st.subheader("LLM Explanation")
-# st.write(llm_response)
+# response = client.models.generate_content(
+#     model="gemini-2.5-flash",
+#     contents=prompt,
+#     max_output_tokens=300
+# )
 
-# Placeholder for actual LLM integration
-# llm_response = your_llm_api_call(prompt)
-# st.subheader("LLM Explanation")
-# st.write(llm_response)
+# st.text_area("LLM Response", response.text, height=300)
+
+# -----------------------------
+# LLM topic selection & prompt
+# -----------------------------
+
+# --- Get API key from environment variable or Streamlit secrets ---
+API_KEY = os.getenv("GEMINI_API_KEY")
+if not API_KEY:
+    st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
+    st.stop()
+
+# Initialize Gemini client
+client = genai.Client(api_key=API_KEY)
+
+st.subheader("LLM Explanation")
+topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
+
+prompt = f"Explain how the following features contribute to {topic} prediction:\n"
+
+st.text_area("LLM Prompt", prompt, height=200)
+
+Placeholder for LLM integration
+llm_response = your_llm_api_call(prompt)
+st.subheader("LLM Explanation")
+st.write(llm_response)
+
+Placeholder for actual LLM integration
+llm_response = your_llm_api_call(prompt)
+st.subheader("LLM Explanation")
+st.write(llm_response)
 
 
-# User input: dropdown or text
-# topic = st.selectbox("Choose a topic:", ["Artificial Intelligence", "Stock Market", "Crypto", "Finance"])
-# user_prompt = st.text_area("Or enter your own prompt:")
+User input: dropdown or text
+topic = st.selectbox("Choose a topic:", ["Artificial Intelligence", "Stock Market", "Crypto", "Finance"])
+user_prompt = st.text_area("Or enter your own prompt:")
 
-# if st.button("Generate Content"):
-#     # Construct the prompt
-#     prompt_text = user_prompt if user_prompt else f"Explain {topic} in a few words"
+if st.button("Generate Content"):
+    # Construct the prompt
+    prompt_text = user_prompt if user_prompt else f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
 
-#     try:
-#         # Generate content using Gemini 2.5 Flash
-#         response = client.models.generate_content(
-#             model="gemini-2.5-flash",
-#             contents=prompt_text
-#         )
+    try:
+        # Generate content using Gemini 2.5 Flash
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt_text
+        )
 
-#         # Display the result
-#         st.subheader("Generated Content")
-#         st.write(response.text)
+        # Display the result
+        st.subheader("Generated Content")
+        st.write(response.text)
 
-#     except Exception as e:
-#         st.error(f"Error generating content: {e}")
+    except Exception as e:
+        st.error(f"Error generating content: {e}")
