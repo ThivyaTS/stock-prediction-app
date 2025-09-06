@@ -7,9 +7,7 @@ pandas
 numpy
 plotly>=5.0.0
 streamlit
-ollama
 python-dotenv   # optional, only if you plan to use .env for config
-google-generativeai
 streamlit
 pandas
 torch
