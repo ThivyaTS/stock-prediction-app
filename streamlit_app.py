@@ -90,30 +90,30 @@ with col1:
 )
     st.plotly_chart(fig1, use_container_width=True)
 
-# -------------------------
-# Right Column: Volume
-# -------------------------
-with col2:
-    st.subheader(f"{selected_ticker} Volume")
+# # -------------------------
+# # Right Column: Volume
+# # -------------------------
+# with col2:
+#     st.subheader(f"{selected_ticker} Volume")
     
-    fig2 = go.Figure()
-    fig2.add_trace(go.Bar(
-        x=ticker_data['Date'],
-        y=ticker_data['Volume'],
-        name='Volume',
-        marker_color='orange'
-    ))
+#     fig2 = go.Figure()
+#     fig2.add_trace(go.Bar(
+#         x=ticker_data['Date'],
+#         y=ticker_data['Volume'],
+#         name='Volume',
+#         marker_color='orange'
+#     ))
 
-    fig2.update_layout(
-        title="Trading Volume",
-        xaxis_title='Date',
-        yaxis_title='Volume',
-        xaxis=dict(rangeslider=dict(visible=True)),
-        template='plotly_white',
-        height=500  # taller figure
-    )
+#     fig2.update_layout(
+#         title="Trading Volume",
+#         xaxis_title='Date',
+#         yaxis_title='Volume',
+#         xaxis=dict(rangeslider=dict(visible=True)),
+#         template='plotly_white',
+#         height=500  # taller figure
+#     )
     
-    st.plotly_chart(fig2, use_container_width=True)
+#     st.plotly_chart(fig2, use_container_width=True)
 
 
 
