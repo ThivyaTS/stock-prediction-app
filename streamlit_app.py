@@ -392,10 +392,6 @@ shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
 # LLM topic selection & prompt
 # -----------------------------
 
-import streamlit as st
-import os
-import google.generativeai as genai
-
 # --- Get API key from environment variable or Streamlit secrets ---
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
