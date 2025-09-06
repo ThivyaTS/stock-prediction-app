@@ -184,11 +184,8 @@ fig.add_trace(go.Scatter(
     name='Actual Close'
 ))
 
-# Last trading date in your dataset
-last_date = dataFrame.index[-1]  # 2024-10-11
-
-# Next trading day (skip weekend)
-pred_date = last_date + pd.Timedelta(days=3)  # Friday + 3 = Monday
+# Plot predicted next day
+pred_date = dataFrame.index[-1] + pd.Timedelta(days=1)
 fig.add_trace(go.Scatter(
     x=[pred_date],
     y=[predicted_close],
@@ -196,8 +193,6 @@ fig.add_trace(go.Scatter(
     name='Predicted Close',
     marker=dict(color='red', size=10)
 ))
-
-st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}**")
 
 fig.update_layout(
     title='Latest Close Prices + Next Day Prediction',
@@ -207,6 +202,8 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}**")
+
 
 
 
