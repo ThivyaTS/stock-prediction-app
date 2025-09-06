@@ -423,11 +423,12 @@ if st.button("Generate Content"):
 
     try:
         # Generate content using Gemini 1.5 Flash
-        response = client.generate_content(
-            model="gemini-1.5-flash",
-            contents=prompt_text
+        response = client.models.generate_content_stream(
+            model="gemini-2.5-flash",
+            contents=["Explain how AI works"]
         )
-
+        for chunk in response:
+          print(chunk.text, end="")
         # Display the result
         st.subheader("Generated Content")
         st.write(response.text)
