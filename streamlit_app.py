@@ -110,6 +110,15 @@ st.plotly_chart(fig1, use_container_width=True)
 #     st.plotly_chart(fig2, use_container_width=True)
 
 
+import joblib
+from tensorflow import keras
+
+# Load LSTM model
+model = keras.models.load_model("multivariate_lstm_model_aapl.keras")
+
+# Load scalers
+feature_scaler = joblib.load("feature_scaler_aapl.save")
+target_scaler = joblib.load("target_scaler_aapl.save")
 
 
 
