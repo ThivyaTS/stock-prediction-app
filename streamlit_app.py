@@ -126,13 +126,13 @@ if 'Date' in latest_data.columns:
 # Impute missing values (if any)
 from sklearn.impute import SimpleImputer
 imputer = SimpleImputer()
-latest_scaled = pd.data(
+latest_scaled = pd.DataFrame(
     imputer.fit_transform(latest_data),
     columns=latest_data.columns
 )
 
 # Scale features
-latest_scaled = pd.data(
+latest_scaled = pd.DataFrame(
     feature_scaler.transform(latest_scaled),
     columns=latest_scaled.columns
 )
