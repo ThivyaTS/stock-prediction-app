@@ -428,9 +428,9 @@ if st.button("Generate Content"):
     prompt_text = user_prompt if user_prompt else f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
 
     try:
-        # Generate content using Gemini 2.5 Flash
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
+        # Generate content using Gemini 1.5 Flash (or the correct model name)
+        response = client.generate_content(
+            model="gemini-2.0-flash",  # Corrected method call and a common model name
             contents=prompt_text
         )
 
