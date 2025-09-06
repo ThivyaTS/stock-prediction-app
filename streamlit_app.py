@@ -4,7 +4,8 @@ import numpy as np
 import plotly.graph_objects as go
 from sklearn.preprocessing import MinMaxScaler 
 import os
-import genai  # make sure google-genai>=0.11.0 is in requirements.txt
+from google import genai
+  # make sure google-genai>=0.11.0 is in requirements.txt
 
 import plotly.graph_objects as go
 
