@@ -108,65 +108,102 @@ st.plotly_chart(fig1, use_container_width=True)
 #     )
     
 #     st.plotly_chart(fig2, use_container_width=True)
-window = 20
-
-# Select last 20 rows (excluding Date if already dropped)
-latest_data = data[-window:].copy()
-
-
-# Load feature scaler
+import streamlit as st
+import pandas as pd
+import numpy as np
+from sklearn.impute import SimpleImputer
 import joblib
+from tensorflow import keras
+import plotly.graph_objects as go
+
+# -----------------------------
+# Load saved model and scalers
+# -----------------------------
+model = keras.models.load_model("multivariate_lstm_model_aapl.keras")
 feature_scaler = joblib.load("feature_scaler_aapl.save")
 target_scaler = joblib.load("target_scaler_aapl.save")
 
-# Drop Date if present
-if 'Date' in latest_data.columns:
-    latest_data = latest_data.drop(columns=['Date'])
+# -----------------------------
+# Load your dataset
+# -----------------------------
+dataFrame = pd.read_csv("dataFrame no last 5 rows.csv")
+dataFrame['Date'] = pd.to_datetime(dataFrame['Date'])
+dataFrame.set_index('Date', inplace=True)
 
-# Impute missing values (if any)
-from sklearn.impute import SimpleImputer
+# -----------------------------
+# Select latest 20 rows
+# -----------------------------
+window = 20
+latest_data = dataFrame[-window:].copy()
+
+# -----------------------------
+# Drop non-numeric columns (e.g., ticker or strings)
+# -----------------------------
+non_numeric_cols = latest_data.select_dtypes(exclude=np.number).columns
+latest_data_numeric = latest_data.drop(columns=non_numeric_cols)
+
+# -----------------------------
+# Impute missing numeric values
+# -----------------------------
 imputer = SimpleImputer()
 latest_scaled = pd.DataFrame(
-    imputer.fit_transform(latest_data),
-    columns=latest_data.columns
+    imputer.fit_transform(latest_data_numeric),
+    columns=latest_data_numeric.columns
 )
 
+# -----------------------------
 # Scale features
+# -----------------------------
 latest_scaled = pd.DataFrame(
     feature_scaler.transform(latest_scaled),
     columns=latest_scaled.columns
 )
 
-import numpy as np
-
+# -----------------------------
+# Reshape for LSTM (samples, timesteps, features)
+# -----------------------------
 X_input = latest_scaled.values.reshape(1, window, latest_scaled.shape[1])
 
-from tensorflow import keras
-
-model = keras.models.load_model("multivariate_lstm_model_aapl.keras")
-
-# Predict scaled Close
+# -----------------------------
+# Predict next day Close
+# -----------------------------
 y_pred_scaled = model.predict(X_input)
-
-# Inverse scale to original price
 y_pred = target_scaler.inverse_transform(y_pred_scaled)
-print("Predicted Close price for next day:", y_pred[0][0])
+predicted_close = y_pred[0][0]
 
-import plotly.graph_objects as go
-
-# Last 20 actual Close values
-dates = data.index[-window:]
-actual_close = data['Close'][-window:]
-
+# -----------------------------
+# Visualization
+# -----------------------------
 fig = go.Figure()
-fig.add_trace(go.Scatter(x=dates, y=actual_close, mode='lines', name='Actual Close'))
 
-# Next predicted day
-pred_date = dates[-1] + pd.Timedelta(days=1)
-fig.add_trace(go.Scatter(x=[pred_date], y=[y_pred[0][0]], mode='markers', name='Predicted Close', marker=dict(color='red', size=10)))
+# Plot last 20 actual Close values
+fig.add_trace(go.Scatter(
+    x=dataFrame.index[-window:], 
+    y=dataFrame['Close'][-window:], 
+    mode='lines', 
+    name='Actual Close'
+))
 
-fig.update_layout(title='Latest Close Prices + Prediction', xaxis_title='Date', yaxis_title='Close Price')
+# Plot predicted next day
+pred_date = dataFrame.index[-1] + pd.Timedelta(days=1)
+fig.add_trace(go.Scatter(
+    x=[pred_date],
+    y=[predicted_close],
+    mode='markers',
+    name='Predicted Close',
+    marker=dict(color='red', size=10)
+))
+
+fig.update_layout(
+    title='Latest Close Prices + Next Day Prediction',
+    xaxis_title='Date',
+    yaxis_title='Close Price',
+    template='plotly_white'
+)
+
 st.plotly_chart(fig, use_container_width=True)
+st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}**")
+
 
 
 
