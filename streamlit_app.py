@@ -186,7 +186,7 @@ fig.add_trace(go.Scatter(
 
 # Plot predicted next day
 pred_date = dataFrame.index[-1] + pd.Timedelta(days=1)
-fig.add_trace(go.Scatter(
+fig1.add_trace(go.Scatter(
     x=[pred_date],
     y=[predicted_close],
     mode='markers',
@@ -194,14 +194,14 @@ fig.add_trace(go.Scatter(
     marker=dict(color='red', size=10)
 ))
 
-fig.update_layout(
+fig1.update_layout(
     title='Latest Close Prices + Next Day Prediction',
     xaxis_title='Date',
     yaxis_title='Close Price',
     template='plotly_white'
 )
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig1, use_container_width=True)
 st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}**")
 
 
