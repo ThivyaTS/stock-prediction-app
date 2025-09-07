@@ -84,7 +84,7 @@ set_fixed_background("bg_thivya_web.jpg")
 # -------------------------
 # Centered Apple logo + Title using columns
 # -------------------------
-col1, col2, col3 = st.columns([3, 2, 1])  # middle col is wider
+col1, col2, col3 = st.columns([2, 2, 2])  # middle col is wider
 with col2:
     st.image("apple_image.png", width=200)  # Apple logo
     st.markdown(
