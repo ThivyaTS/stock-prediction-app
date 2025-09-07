@@ -365,32 +365,17 @@ if st.button("Generate"):
 
 #----------------------------------------------------------
 # ==============================
-# Continuous Prediction Section
+# Step-by-Step Prediction Section
 # ==============================
-import time
 
-# Session state to control loop
-if "predicting" not in st.session_state:
-    st.session_state.predicting = False
+# Initialize storage for predictions if not already present
+if "predictions" not in st.session_state:
+    st.session_state.predictions = dataFrame.copy()
 
-# Start/Stop buttons
-colA, colB = st.columns(2)
-with colA:
-    if st.button("▶ Start Continuous Prediction"):
-        st.session_state.predicting = True
-with colB:
-    if st.button("⏹ Stop"):
-        st.session_state.predicting = False
-
-# Continuous loop
-placeholder_chart = st.empty()
-placeholder_text = st.empty()
-
-while st.session_state.predicting:
-    # -----------------------------
-    # Use last `window` rows (including new predictions if available)
-    # -----------------------------
-    latest_data = dataFrame[-window:].copy()
+# Button for next prediction
+if st.button("🔮 Predict Next Step"):
+    # Take latest window rows
+    latest_data = st.session_state.predictions[-window:].copy()
     non_numeric_cols = latest_data.select_dtypes(exclude=np.number).columns
     latest_data_numeric = latest_data.drop(columns=non_numeric_cols)
 
@@ -412,34 +397,30 @@ while st.session_state.predicting:
     y_pred = target_scaler.inverse_transform(y_pred_scaled)
     predicted_close = y_pred[0][0]
 
-    # Add prediction to dataframe for chaining
-    last_date = dataFrame.index[-1]
+    # Add prediction to session_state dataframe
+    last_date = st.session_state.predictions.index[-1]
     pred_date = last_date + timedelta(days=1)
-    dataFrame.loc[pred_date, "Close"] = predicted_close
+    st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
 
-    # -----------------------------
-    # Update figure
-    # -----------------------------
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=dataFrame.index[-(window+5):], 
-        y=dataFrame['Close'].iloc[-(window+5):], 
-        mode='lines+markers', 
-        name='Close (Actual + Predicted)'
-    ))
+    st.success(f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**")
 
-    fig.update_layout(
-        title='Continuous Predictions',
-        xaxis_title='Date',
-        yaxis_title='Close Price',
-        template='plotly_white'
-    )
+# Plot updated figure
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=st.session_state.predictions.index[-(window+10):], 
+    y=st.session_state.predictions['Close'].iloc[-(window+10):], 
+    mode='lines+markers', 
+    name='Close (Actual + Predicted)'
+))
 
-    placeholder_chart.plotly_chart(fig, use_container_width=True)
-    placeholder_text.write(f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**")
+fig.update_layout(
+    title='Step-by-Step Predictions',
+    xaxis_title='Date',
+    yaxis_title='Close Price',
+    template='plotly_white'
+)
 
-    # Sleep to avoid too-fast loop (adjust as needed)
-    time.sleep(2)
+st.plotly_chart(fig, use_container_width=True)
 
 
 
