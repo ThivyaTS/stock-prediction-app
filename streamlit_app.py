@@ -279,8 +279,8 @@ for i, feature in enumerate(latest_scaled.columns):
         "shap_importance": float(sv_sum[0, i])     # SHAP still based on scaled input
     }
 
-st.write("Feature Summary (for LLM, original feature values):")
-st.json(feature_summary)
+# st.write("Feature Summary (for LLM, original feature values):")
+# st.json(feature_summary)
 
 # -----------------------------
 # Convert JSON summary to prompt text
@@ -294,8 +294,8 @@ for feature, values in feature_summary.items():
 
 prompt_text = "\n".join(prompt_lines)
 
-st.write("LLM Prompt Text:")
-st.text(prompt_text)
+# st.write("LLM Prompt Text:")
+# st.text(prompt_text)
 # Display in Streamlit as table
 # st.write("Feature Summary (for LLM):")
 # st.json(feature_summary)
