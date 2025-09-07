@@ -225,23 +225,19 @@ st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}
 
 import shap
 
-# -----------------------------
-# SHAP Explainer
-# -----------------------------
-# Use a small background set (latest window)
-background = X_input  # already reshaped: (1, window, features)
+# Flatten the LSTM input: (samples, timesteps * features)
+X_input_flat = X_input.reshape(X_input.shape[0], -1)
+background_flat = X_input_flat  # small background
 
-# KernelExplainer for non-linear models like LSTM
-explainer = shap.KernelExplainer(model.predict, background)
+# Define KernelExplainer
+explainer = shap.KernelExplainer(lambda x: model.predict(x.reshape(x.shape[0], window, latest_scaled.shape[1])), background_flat)
 
-# Explain the prediction for X_input
-shap_values = explainer.shap_values(X_input)
+# Compute SHAP values
+shap_values = explainer.shap_values(X_input_flat)
 
-# Convert to DataFrame for easier visualization
-shap_df = pd.DataFrame(
-    shap_values[0][0],  # first sample
-    columns=latest_scaled.columns
-)
+# Convert to DataFrame for display
+feature_names = [f"{col}_t{t}" for t in range(window) for col in latest_scaled.columns]
+shap_df = pd.DataFrame(shap_values[0], columns=feature_names)
 
 st.write("SHAP values for latest input features:")
 st.dataframe(shap_df.T)
