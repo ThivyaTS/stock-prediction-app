@@ -54,7 +54,7 @@ def set_background(image_file):
         background-image: url("data:image/jpg;base64,{encoded_bg}");
         background-size: cover;
         background-repeat: no-repeat;
-        background-attachment: fixed;
+        background-attachment: scroll;  /* changed fixed to scroll */
         opacity: 1;
     }}
 
