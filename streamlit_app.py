@@ -510,7 +510,7 @@ if st.button("🔮 Predict Next Step"):
         with st.container():
             st.markdown(
                 f"""
-                <div style="background-color:#f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
+                <div style="background-color:#black; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
                     <p style="font-size: 16px; line-height: 1.6; color: #black;">{final_explanation}</p>
                 </div>
                 """,
