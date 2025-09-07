@@ -81,7 +81,7 @@ set_fixed_background("bg_thivya_web.jpg")
 # -------------------------
 # Title with small Apple image
 # -------------------------
-col1, col2 = st.columns([1, 8])  # image smaller, text larger
+col1, col2 = st.columns([5, 8])  # image smaller, text larger
 with col1:
     st.image("apple_image.png", width=50)  # small logo
 with col2:
