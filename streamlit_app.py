@@ -125,7 +125,9 @@ with col1:
             type="date",
         ),
         template='plotly_white',
-        height=500
+        height=500,
+        plot_bgcolor='rgba(0,0,0,0)',   # transparent chart area
+        paper_bgcolor='rgba(0,0,0,0)'   # transparent outside chart
     )
     st.plotly_chart(fig1, use_container_width=True)
 
