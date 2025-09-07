@@ -423,6 +423,8 @@ if st.button("🔮 Predict Next Step"):
         title='Step-by-Step Predictions',
         xaxis_title='Date',
         yaxis_title='Close Price',
+        plot_bgcolor='rgba(0,0,0,0.7)',   # chart area: black, 70% opacity
+        paper_bgcolor='rgba(0,0,0,0.0)',  # outside area: black, 70% opacity
         template='plotly_white'
     )
     
