@@ -84,7 +84,8 @@ set_fixed_background("bg_thivya_web.jpg")
 st.markdown(
     """
     <div style="text-align: center;">
-        <img src="apple_image.png" alt="Apple Logo" width="200">
+        <img src="apple_image.png" alt="Apple Logo" width="80">
+        <h2>📊 Stock Price Visualization</h2>
     </div>
     """,
     unsafe_allow_html=True
