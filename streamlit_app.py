@@ -127,17 +127,8 @@ with col1:
         template='plotly_white',
         height=500
     )
-
-    # 🔹 Wrap chart in a styled div
-    st.markdown(
-        """
-        <div style="background-color: white; border-radius: 20px; 
-                    padding: 15px; box-shadow: 0px 4px 10px rgba(0,0,0,0.1);">
-        """,
-        unsafe_allow_html=True
-    )
     st.plotly_chart(fig1, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+
 
 # -------------------------
 # Right Column: Volume
