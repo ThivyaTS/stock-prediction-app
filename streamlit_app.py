@@ -327,6 +327,12 @@ latest_data = dataFrame[-window:].copy()
 if "predictions" not in st.session_state:
     st.session_state.predictions = dataFrame.copy()
 
+#new
+# Initialize to store only predicted rows
+if "predicted_rows" not in st.session_state:
+    st.session_state.predicted_rows = pd.DataFrame(columns=["Date", "Predicted Close"])
+
+
 # Button for next prediction
 if st.button("🔮 Predict Next Step"):
     
@@ -367,7 +373,16 @@ if st.button("🔮 Predict Next Step"):
         mode='lines+markers', 
         name='Close (Actual + Predicted)'
     ))
-    
+    #new
+    # Store predicted row
+    st.session_state.predicted_rows = pd.concat([
+        st.session_state.predicted_rows,
+        pd.DataFrame({
+            "Date": [pred_date],
+            "Predicted Close": [round(predicted_close, 2)]
+        })
+    ], ignore_index=True)
+
     fig.update_layout(
         title='Step-by-Step Predictions',
         xaxis_title='Date',
@@ -377,13 +392,17 @@ if st.button("🔮 Predict Next Step"):
     
     st.plotly_chart(fig, use_container_width=True)
 
-    # ↓↓↓ ADD THIS ↓↓↓
-    st.subheader("🧾 Input Data for This Prediction")
+    # -----------------------------
+    # Show table of predicted rows
+    # -----------------------------
+    st.subheader("📅 Predicted Rows")
 
-    latest_display = latest_data.reset_index()
-    latest_display = latest_display.round(2)
+    # Format date nicely if needed
+    predicted_table = st.session_state.predicted_rows.copy()
+    predicted_table["Date"] = pd.to_datetime(predicted_table["Date"]).dt.strftime('%Y-%m-%d')
 
-    st.dataframe(latest_display, use_container_width=True, hide_index=True)
+    st.dataframe(predicted_table, use_container_width=True, hide_index=True)
+
 
     # -----------------------------
     # SHAP explainer for LSTM
