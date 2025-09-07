@@ -500,16 +500,25 @@ if st.button("🔮 Predict Next Step"):
       
       # Streamlit UI
       # Streamlit UI
-    st.markdown("## 📘 Stock Price Explanation Summary")
-
-    # Streamlit UI
     st.title("Google GenAI Explanation")
 
-    # Clean up prompt text (this line alone doesn't modify it unless reassigned)
     prompt_text = prompt_text.strip()
 
-    # Call the generation function to stream or display the explanation
-    generate(prompt_text)
+    final_explanation = generate(prompt_text)  # This must return string
+
+    if final_explanation:
+        with st.container():
+            st.markdown(
+                f"""
+                <div style="background-color:#f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
+                    <p style="font-size: 16px; line-height: 1.6; color: #333;">{final_explanation}</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+    else:
+        st.warning("No explanation was generated.")
+
 
 
 
