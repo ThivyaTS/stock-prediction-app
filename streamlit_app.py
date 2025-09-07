@@ -39,39 +39,22 @@ import warnings
 
 import base64
 
-def get_base64_bg(image_path):
+def set_fixed_background(image_path):
     with open(image_path, "rb") as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
+        encoded = base64.b64encode(f.read()).decode()
 
-def set_background(image_file):
-    encoded_bg = get_base64_bg(image_file)
-    background_css = f"""
+    css = f"""
     <style>
-    /* Fixed blurred background layer */
-    .blur-bg {{
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        background-image: url("data:image/jpg;base64,{encoded_bg}");
+    .stApp {{
+        background-image: url("data:image/png;base64,{encoded}");
         background-size: cover;
         background-repeat: no-repeat;
+        background-attachment: fixed;
         background-position: center;
-        filter: blur(8px);
-        z-index: -1;
-        pointer-events: none;  /* Make sure clicks pass through */
-    }}
-
-    /* Streamlit app container */
-    .stApp {{
-        position: relative;
-        z-index: 0;
-        background-color: rgba(255, 255, 255, 0.7); /* Optional: add slight white background so text is readable */
     }}
     </style>
-    <div class="blur-bg"></div>
     """
-    st.markdown(background_css, unsafe_allow_html=True)
+    st.markdown(css, unsafe_allow_html=True)
 
 
 
@@ -93,7 +76,7 @@ st.set_page_config(
     page_title="Stock Dashboard",
     layout="wide",  # makes the page full-width
 )
-set_background("bg_thivya_web.jpg")
+set_fixed_background("bg_thivya_web.jpg")
 
 st.title("Stock Price Visualization")
 
