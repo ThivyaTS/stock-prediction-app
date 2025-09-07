@@ -279,14 +279,14 @@ for i, feature in enumerate(latest_scaled.columns):
     }
 
 # Display in Streamlit as table
-st.write("Feature Summary (for LLM):")
-st.json(feature_summary)
+# st.write("Feature Summary (for LLM):")
+# st.json(feature_summary)
 
 # # -----------------------------
 # # LLM Explanation
 # # -----------------------------
 
-shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
+# shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
 # prompt_text = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
 # API_KEY = os.getenv("GEMINI_API_KEY")
 # if not API_KEY:
@@ -427,7 +427,7 @@ if st.button("Generate"):
       # Get the corresponding SHAP text
   # User selects a prompt
     prompts = {
-    "Prompt 1": f"Explain how the following features contributed to prediction:\n{shap_text}",
+    "Prompt 1": f"Explain how the following features contributed to prediction in simple language:\n{feature_summary}",
     "Prompt 2": "SHAP text for prompt 2...",
     "Prompt 3": "SHAP text for prompt 3...",
     # Add more prompts and corresponding SHAP texts as needed
