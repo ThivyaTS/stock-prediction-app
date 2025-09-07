@@ -521,7 +521,7 @@ if st.button("🔮 Predict Next Step"):
     # -----------------------------
     # Convert JSON summary to prompt text
     # -----------------------------
-    instruction = f""" For {pred_date} date. DO NOT SHOW NUMBERS. Explain how each feature influenced tommorow’s stock price prediction. Use the SHAP importance values to describe whether a feature pushed the predicted price higher or lower 
+    instruction = f""" For {pred_date} date. DO NOT SHOW NUMBERS. Explain how each today's stock price feature influenced tommorow’s stock price prediction. Use the SHAP importance values to describe whether a feature pushed the predicted price higher or lower 
     compared to the average. Do not mention technical terms like SHAP and its VALUES or the model — instead, explain in plain language. Focus on the relative contribution of each feature, using everyday examples 
     (e.g., 'slightly increased', 'pushed down strongly'). Summarize the most important drivers, and highlight why today’s prediction looks the way it does. Avoid showing raw numbers — 
     use percentages terms instead.SUMMMARIZE ALL OF THEM IN JUST 50 words. Avoid using special characters like (*?!$)"\n"\n"""
