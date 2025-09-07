@@ -38,8 +38,7 @@ import logging
 import warnings
 
 import base64
-
-def set_blurred_background(image_path: str, blur_px: int = 6):
+def set_scrollable_background(image_path: str):
     with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
 
@@ -48,29 +47,16 @@ def set_blurred_background(image_path: str, blur_px: int = 6):
     body {{
         margin: 0;
         padding: 0;
-        overflow: auto;
         background-image: url("data:image/jpeg;base64,{encoded}");
         background-repeat: no-repeat;
         background-position: center;
         background-size: cover;
         background-attachment: scroll;
-        filter: blur({blur_px}px);
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
-        z-index: -1;
-    }}
-    .stApp {{
-        position: relative;
-        background-color: rgba(255, 255, 255, 0.8); /* slightly translucent background */
-        z-index: 1;
-        padding: 1rem;
-        border-radius: 8px;
     }}
     </style>
     """
-
     st.markdown(css, unsafe_allow_html=True)
+
 
 
 
@@ -92,8 +78,7 @@ st.set_page_config(
     page_title="Stock Dashboard",
     layout="wide",  # makes the page full-width
 )
-
-set_blurred_background("bg_thivya_web.jpg", blur_px=6)
+set_scrollable_background("bg_thivya_web.jpg")
 
 st.title("Stock Price Visualization")
 
