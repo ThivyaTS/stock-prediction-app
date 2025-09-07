@@ -140,46 +140,58 @@ def load_financial_data():
     df = df.dropna(how='all')  # Drop empty rows
     df.columns = df.columns.str.strip()
     df['year'] = pd.to_datetime(df['year'], errors='coerce').dt.year
-    df = df.dropna(subset=['year'])  # Drop rows where date couldn't be parsed
+    df = df.dropna(subset=['year'])
     df['year'] = df['year'].astype(int).astype(str)
     df = df.sort_values('year')
     return df
 
 fin_data = load_financial_data()
 
-# Map shorter names
-metric_map = {
-    "EPS": "EPS",
-    "Net income": "Net Income",
-    "Revenue": "Revenue",
-    "Net profit margin": "Profit Margin (%)",
-    "EBITDA": "EBITDA",
-    "Operating expense": "OpEx"
-}
+# Column layout: chart | table
+col_chart, col_table = st.columns([2, 1])  # 2:1 ratio
 
-# --- Plot ---
-fig3 = go.Figure()
+# --------------------------
+# 📊 Plot: Revenue & Net Income
+# --------------------------
+with col_chart:
+    st.subheader("Revenue vs Net Income (Bar Chart)")
 
-for metric in metric_map:
-    if metric in fin_data.columns:
-        fig3.add_trace(go.Bar(
-            x=fin_data['year'],
-            y=fin_data[metric],
-            name=metric_map[metric]
-        ))
+    fig = go.Figure()
 
-fig3.update_layout(
-    title="Apple Financial Overview by Year",
-    barmode='group',
-    xaxis_title='Fiscal Year',
-    yaxis_title='Amount (raw scale)',
-    template='plotly_white',
-    height=500
-)
+    for metric in ["Revenue", "Net income"]:
+        if metric in fin_data.columns:
+            fig.add_trace(go.Bar(
+                x=fin_data['year'],
+                y=fin_data[metric],
+                name=metric
+            ))
 
-# --- Display full-width chart ---
-st.subheader("📊 Annual Financial Metrics")
-st.plotly_chart(fig3, use_container_width=True)
+    fig.update_layout(
+        barmode='group',
+        xaxis_title="Fiscal Year",
+        yaxis_title="Amount (raw scale)",
+        template="plotly_white",
+        height=500,
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# --------------------------
+# 📋 Table: Remaining Metrics
+# --------------------------
+with col_table:
+    st.subheader("Other Key Metrics")
+
+    # Select only the remaining columns
+    display_cols = ["year", "EPS", "Net profit margin", "EBITDA", "Operating expense"]
+    table_data = fin_data[display_cols].copy()
+
+    # Optional: Round for readability
+    table_data = table_data.round(2)
+
+    # Display the table
+    st.dataframe(table_data, use_container_width=True)
+
 
 
 
