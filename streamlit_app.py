@@ -40,47 +40,31 @@ import warnings
 import base64
 
 
-def set_blurred_background(image_path: str, blur_px: int = 6):
+def add_blurred_background(image_path: str, blur_amount: int = 6):
     with open(image_path, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode()
+        encoded_image = base64.b64encode(f.read()).decode()
 
     css = f"""
     <style>
-    .stApp {{
-        background: none;
-        position: relative;
-        z-index: 0;
-    }}
-    .blur-bg-container {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: -1;
-        overflow: hidden;
-    }}
-    .blur-bg-container::before {{
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url("data:image/jpeg;base64,{encoded}");
+    body {{
+        background-image: url("data:image/jpeg;base64,{encoded_image}");
         background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
         background-position: center;
-        filter: blur({blur_px}px);
-        transform: scale(1.05);  /* Optional: fix edges from blur cut-off */
+        filter: blur({blur_amount}px);
+    }}
+    .stApp {{
+        background-color: rgba(255, 255, 255, 0.75); /* Optional: light background for content readability */
+        backdrop-filter: blur(0px); /* Prevent double-blur effect */
     }}
     </style>
-    <div class="blur-bg-container"></div>
     """
-
     st.markdown(css, unsafe_allow_html=True)
 
 # ✅ Call this early in the app
-set_blurred_background("bg_thivya_web.jpg", blur_px=6)
+add_blurred_background("bg_thivya_web.jpg", blur_amount=6)
+
 
 
 
