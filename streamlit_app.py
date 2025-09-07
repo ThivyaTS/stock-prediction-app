@@ -351,20 +351,20 @@ def model_predict(input_2d):
     return pred
 
 explainer = shap.KernelExplainer(model_predict, background)
-shap_values = explainer.shap_values(X_input_flat)
+# shap_values = explainer.shap_values(X_input_flat)
 
-# Aggregate SHAP values per feature
-shap_values_array = shap_values[0].reshape(window, num_features)
-feature_importance = np.abs(shap_values_array).sum(axis=0)
-feature_names = latest_scaled.columns
-shap_summary = dict(zip(feature_names, feature_importance))
-shap_summary_sorted = dict(sorted(shap_summary.items(), key=lambda x: x[1], reverse=True))
+# # Aggregate SHAP values per feature
+# shap_values_array = shap_values[0].reshape(window, num_features)
+# feature_importance = np.abs(shap_values_array).sum(axis=0)
+# feature_names = latest_scaled.columns
+# shap_summary = dict(zip(feature_names, feature_importance))
+# shap_summary_sorted = dict(sorted(shap_summary.items(), key=lambda x: x[1], reverse=True))
 
 # -----------------------------
 # LLM Explanation
 # -----------------------------
 
-shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
+# shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
 # prompt_text = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
 # API_KEY = os.getenv("GEMINI_API_KEY")
 # if not API_KEY:
@@ -392,47 +392,53 @@ shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
 # LLM topic selection & prompt
 # -----------------------------
 
-# --- Get API key from environment variable or Streamlit secrets ---
-API_KEY = os.getenv("GEMINI_API_KEY")
-if not API_KEY:
-    st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
-    st.stop()
+# # --- Get API key from environment variable or Streamlit secrets ---
+# API_KEY = os.getenv("GEMINI_API_KEY")
+# if not API_KEY:
+#     st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
+#     st.stop()
 
-# Initialize Gemini client
-client = genai.Client(api_key=API_KEY)
+# # Initialize Gemini client
+# client = genai.Client(api_key=API_KEY)
 
-st.title("Stock Prediction LLM Explainer")
+# st.title("Stock Prediction LLM Explainer")
 
-# User input: dropdown or text
-topic = st.selectbox("Choose a topic:", ["Predicted Close", "Predicted Open", "Artificial Intelligence", "Stock Market", "Crypto", "Finance"])
-user_prompt = st.text_area("Or enter your own prompt:")
+# # User input: dropdown or text
+# topic = st.selectbox("Choose a topic:", ["Predicted Close", "Predicted Open", "Artificial Intelligence", "Stock Market", "Crypto", "Finance"])
+# user_prompt = st.text_area("Or enter your own prompt:")
 
-# Placeholder for SHAP text. You must populate this variable with your SHAP explanation text.
-shap_text = "Example SHAP explanation text. You need to replace this with your actual SHAP data."
+# # Placeholder for SHAP text. You must populate this variable with your SHAP explanation text.
+# shap_text = "Example SHAP explanation text. You need to replace this with your actual SHAP data."
 
-if st.button("Generate Content"):
-    # Construct the prompt
-    if user_prompt:
-        prompt_text = user_prompt
-    else:
-        # Check if topic is a stock prediction type and use shap_text
-        if topic in ["Predicted Close", "Predicted Open"]:
-            prompt_text = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
-        else:
-            prompt_text = f"Explain {topic}." # A simple prompt for general topics
+# if st.button("Generate Content"):
+#     # Construct the prompt
+#     if user_prompt:
+#         prompt_text = user_prompt
+#     else:
+#         # Check if topic is a stock prediction type and use shap_text
+#         if topic in ["Predicted Close", "Predicted Open"]:
+#             prompt_text = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
+#         else:
+#             prompt_text = f"Explain {topic}." # A simple prompt for general topics
 
-    try:
-        # Generate content using Gemini 1.5 Flash
-        response = client.models.generate_content(
-            model="gemini-2.5-flash", contents="Explain how AI works in a few words"
-        )
+#     try:
+#         # Generate content using Gemini 1.5 Flash
+#         response = client.models.generate_content(
+#             model="gemini-2.5-flash", contents="Explain how AI works in a few words"
+#         )
         
-        # Display the result
-        st.subheader("Generated Content")
-        st.write(response.text)
+#         # Display the result
+#         st.subheader("Generated Content")
+#         st.write(response.text)
 
-    except Exception as e:
-        st.error(f"Error generating content: {e}")
+#     except Exception as e:
+#         st.error(f"Error generating content: {e}")
+
+
+
+
+
+
 
 
 
