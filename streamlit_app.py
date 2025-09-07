@@ -40,36 +40,47 @@ import warnings
 import base64
 
 
-def set_blurred_background(image_path: str, blur_px: int = 8):
+def set_blurred_background(image_path: str, blur_px: int = 6):
     with open(image_path, "rb") as f:
-        encoded_image = base64.b64encode(f.read()).decode()
+        encoded = base64.b64encode(f.read()).decode()
 
-    css_code = f"""
-        <style>
-        .stApp {{
-            background: none;
-            position: relative;
-        }}
-        .blur-bg {{
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
-            z-index: -1;
-            background-image: url("data:image/jpg;base64,{encoded_image}");
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            filter: blur({blur_px}px);
-        }}
-        </style>
-        <div class="blur-bg"></div>
+    css = f"""
+    <style>
+    .stApp {{
+        background: none;
+        position: relative;
+        z-index: 0;
+    }}
+    .blur-bg-container {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+        overflow: hidden;
+    }}
+    .blur-bg-container::before {{
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/jpeg;base64,{encoded}");
+        background-size: cover;
+        background-position: center;
+        filter: blur({blur_px}px);
+        transform: scale(1.05);  /* Optional: fix edges from blur cut-off */
+    }}
+    </style>
+    <div class="blur-bg-container"></div>
     """
-    st.markdown(css_code, unsafe_allow_html=True)
 
-# Usage:
-set_blurred_background("bg_thivya_web.jpg")
+    st.markdown(css, unsafe_allow_html=True)
+
+# ✅ Call this early in the app
+set_blurred_background("bg_thivya_web.jpg", blur_px=6)
 
 
 
