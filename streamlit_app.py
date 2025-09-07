@@ -504,14 +504,14 @@ if st.button("Generate"):
       # Example mapping of prompts to pre-existing SHAP texts
       # Get the corresponding SHAP text
   # User selects a prompt
-    selected_prompt = st.selectbox("What would you like to know about the prediction?:", list(prompts.keys()))
-    user_input = prompts[selected_prompt]
     prompts = {
     "Prompt 1": f"Explain how the following features contributed to prediction:\n{shap_text}",
     "Prompt 2": "SHAP text for prompt 2...",
     "Prompt 3": "SHAP text for prompt 3...",
     # Add more prompts and corresponding SHAP texts as needed
     }
+    selected_prompt = st.selectbox("What would you like to know about the prediction?:", list(prompts.keys()))
+    user_input = prompts[selected_prompt]
     if user_input.strip():
       generate(user_input)
     else:
