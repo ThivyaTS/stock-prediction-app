@@ -238,6 +238,7 @@ if "predictions" not in st.session_state:
 
 # Button for next prediction
 if st.button("🔮 Predict Next Step"):
+    
     # Take latest window rows
     latest_data = st.session_state.predictions[-window:].copy()
     non_numeric_cols = latest_data.select_dtypes(exclude=np.number).columns
@@ -268,159 +269,157 @@ if st.button("🔮 Predict Next Step"):
 
     st.success(f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**")
 
-# Plot updated figure
-fig = go.Figure()
-fig.add_trace(go.Scatter(
-    x=st.session_state.predictions.index[-(window+10):], 
-    y=st.session_state.predictions['Close'].iloc[-(window+10):], 
-    mode='lines+markers', 
-    name='Close (Actual + Predicted)'
-))
-
-fig.update_layout(
-    title='Step-by-Step Predictions',
-    xaxis_title='Date',
-    yaxis_title='Close Price',
-    template='plotly_white'
-)
-
-st.plotly_chart(fig, use_container_width=True)
-
-
-
-import shap
-import matplotlib.pyplot as plt
-
-# -----------------------------
-# SHAP explainer for LSTM
-# -----------------------------
-timesteps = X_input.shape[1]
-features = X_input.shape[2]
-X_train = np.load("X_train.npy")
-# Wrapper to let SHAP work with LSTM
-def model_predict_wrapper(X_flat):
-    X_3d = X_flat.reshape(X_flat.shape[0], timesteps, features)
-    return model.predict(X_3d)
-
-# -----------------------------
-# Background dataset: 20 sequences from training set
-# -----------------------------
-import numpy as np
-num_bg = min(30, X_train.shape[0])
-idx = np.random.choice(X_train.shape[0], num_bg, replace=False)
-background = X_train[idx]  # shape: (num_bg, timesteps, features)
-background_flat = background.reshape(background.shape[0], -1)
-
-# -----------------------------
-# Initialize KernelExplainer
-# -----------------------------
-explainer = shap.KernelExplainer(model_predict_wrapper, background_flat)
-
-# -----------------------------
-# Sample to explain: latest row
-# -----------------------------
-X_sample_flat = X_input.reshape(X_input.shape[0], -1)  # (1, timesteps*features)
-
-# Compute SHAP values
-shap_values = explainer.shap_values(X_sample_flat)
-
-# -----------------------------
-# Aggregate SHAP over timesteps
-# -----------------------------
-sv_3d = shap_values[0].reshape(X_input.shape[0], timesteps, features)
-sv_sum = np.sum(sv_3d, axis=1)  # (samples, features)
-
-# Average input across timesteps to match shape
-X_agg = np.mean(X_input, axis=1)  # (samples, features)
-X_agg_original = feature_scaler.inverse_transform(X_agg)
-
-# -----------------------------
-# Create summary for LLM (with original feature values)
-# -----------------------------
-feature_summary = {}
-for i, feature in enumerate(latest_scaled.columns):
-    feature_summary[feature] = {
-        "value": float(X_agg_original[0, i]),       # original scale
-        "shap_importance": float(sv_sum[0, i])     # SHAP still based on scaled input
-    }
-
-# st.write("Feature Summary (for LLM, original feature values):")
-# st.json(feature_summary)
-
-# -----------------------------
-# Convert JSON summary to prompt text
-# -----------------------------
-instruction = "Explain the feature contributions and their impact on the next-day Close prediction.DO NOT Mention the numbers.Maybe tell in percentage.Do NOT mention the model itself. Explain in simple english for a non technical person.\n\n"
-
-prompt_lines = [instruction]  # start with instruction
-for feature, values in feature_summary.items():
-    line = f"- {feature}: value = {values['value']:.2f}, SHAP importance = {values['shap_importance']:.4f}"
-    prompt_lines.append(line)
-
-prompt_text = "\n".join(prompt_lines)
-
-def save_binary_file(file_name, data):
-    f = open(file_name, "wb")
-    f.write(data)
-    f.close()
-    st.success(f"File saved to: {file_name}")
-
-def generate(user_input):
-    client = genai.Client(
-        api_key=os.getenv("GEMINI_API_KEY"),
-    )
-
-    model = "gemini-2.5-flash"
-    contents = [
-        types.Content(
-            role="user",
-            parts=[
-                types.Part.from_text(text=user_input),
+    # -----------------------------
+    # SHAP explainer for LSTM
+    # -----------------------------
+    timesteps = X_input.shape[1]
+    features = X_input.shape[2]
+    X_train = np.load("X_train.npy")
+    # Wrapper to let SHAP work with LSTM
+    def model_predict_wrapper(X_flat):
+        X_3d = X_flat.reshape(X_flat.shape[0], timesteps, features)
+        return model.predict(X_3d)
+    
+    # -----------------------------
+    # Background dataset: 20 sequences from training set
+    # -----------------------------
+    import numpy as np
+    num_bg = min(30, X_train.shape[0])
+    idx = np.random.choice(X_train.shape[0], num_bg, replace=False)
+    background = X_train[idx]  # shape: (num_bg, timesteps, features)
+    background_flat = background.reshape(background.shape[0], -1)
+    
+    # -----------------------------
+    # Initialize KernelExplainer
+    # -----------------------------
+    explainer = shap.KernelExplainer(model_predict_wrapper, background_flat)
+    
+    # -----------------------------
+    # Sample to explain: latest row
+    # -----------------------------
+    X_sample_flat = X_input.reshape(X_input.shape[0], -1)  # (1, timesteps*features)
+    
+    # Compute SHAP values
+    shap_values = explainer.shap_values(X_sample_flat)
+    
+    # -----------------------------
+    # Aggregate SHAP over timesteps
+    # -----------------------------
+    sv_3d = shap_values[0].reshape(X_input.shape[0], timesteps, features)
+    sv_sum = np.sum(sv_3d, axis=1)  # (samples, features)
+    
+    # Average input across timesteps to match shape
+    X_agg = np.mean(X_input, axis=1)  # (samples, features)
+    X_agg_original = feature_scaler.inverse_transform(X_agg)
+    
+    # -----------------------------
+    # Create summary for LLM (with original feature values)
+    # -----------------------------
+    feature_summary = {}
+    for i, feature in enumerate(latest_scaled.columns):
+        feature_summary[feature] = {
+            "value": float(X_agg_original[0, i]),       # original scale
+            "shap_importance": float(sv_sum[0, i])     # SHAP still based on scaled input
+        }
+    
+    # st.write("Feature Summary (for LLM, original feature values):")
+    # st.json(feature_summary)
+    
+    # -----------------------------
+    # Convert JSON summary to prompt text
+    # -----------------------------
+    instruction = "Explain the feature contributions and their impact on the next-day Close prediction.DO NOT Mention the numbers.Maybe tell in percentage.Do NOT mention the model itself. Explain in simple english for a non technical person.\n\n"
+    
+    prompt_lines = [instruction]  # start with instruction
+    for feature, values in feature_summary.items():
+        line = f"- {feature}: value = {values['value']:.2f}, SHAP importance = {values['shap_importance']:.4f}"
+        prompt_lines.append(line)
+    
+    prompt_text = "\n".join(prompt_lines)
+    
+    def save_binary_file(file_name, data):
+        f = open(file_name, "wb")
+        f.write(data)
+        f.close()
+        st.success(f"File saved to: {file_name}")
+    
+    def generate(user_input):
+        client = genai.Client(
+            api_key=os.getenv("GEMINI_API_KEY"),
+        )
+    
+        model = "gemini-2.5-flash"
+        contents = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=user_input),
+                ],
+            ),
+        ]
+        generate_content_config = types.GenerateContentConfig(
+            temperature=0.05,
+            response_modalities=[
+                "TEXT",
             ],
-        ),
-    ]
-    generate_content_config = types.GenerateContentConfig(
-        temperature=0.05,
-        response_modalities=[
-            "TEXT",
-        ],
-    )
-
-    file_index = 0
-    for chunk in client.models.generate_content_stream(
-        model=model,
-        contents=contents,
-        config=generate_content_config,
-    ):
-        if (
-            chunk.candidates is None
-            or chunk.candidates[0].content is None
-            or chunk.candidates[0].content.parts is None
+        )
+    
+        file_index = 0
+        for chunk in client.models.generate_content_stream(
+            model=model,
+            contents=contents,
+            config=generate_content_config,
         ):
-            continue
-        if chunk.candidates[0].content.parts[0].inline_data and chunk.candidates[0].content.parts[0].inline_data.data:
-            file_name = f"ENTER_FILE_NAME_{file_index}"
-            file_index += 1
-            inline_data = chunk.candidates[0].content.parts[0].inline_data
-            data_buffer = inline_data.data
-            file_extension = mimetypes.guess_extension(inline_data.mime_type)
-            save_binary_file(f"{file_name}{file_extension}", data_buffer)
+            if (
+                chunk.candidates is None
+                or chunk.candidates[0].content is None
+                or chunk.candidates[0].content.parts is None
+            ):
+                continue
+            if chunk.candidates[0].content.parts[0].inline_data and chunk.candidates[0].content.parts[0].inline_data.data:
+                file_name = f"ENTER_FILE_NAME_{file_index}"
+                file_index += 1
+                inline_data = chunk.candidates[0].content.parts[0].inline_data
+                data_buffer = inline_data.data
+                file_extension = mimetypes.guess_extension(inline_data.mime_type)
+                save_binary_file(f"{file_name}{file_extension}", data_buffer)
+            else:
+                st.text(chunk.text)
+    
+    # Streamlit UI
+    st.title("Google GenAI Explanation")
+    
+    # st.write("**What would you like to know about the prediction?**")
+    # st.text_area("", user_input, height=150)
+    
+    if st.button("Generate"):
+        # Automatically use the SHAP summary prompt text
+        # Make sure 'prompt_text' is already defined from your previous SHAP computation
+        if prompt_text.strip():  # check if prompt_text is not empty
+            generate(prompt_text)
         else:
-            st.text(chunk.text)
+            st.warning("SHAP summary is not available yet.")
+    
+    # Plot updated figure
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=st.session_state.predictions.index[-(window+10):], 
+        y=st.session_state.predictions['Close'].iloc[-(window+10):], 
+        mode='lines+markers', 
+        name='Close (Actual + Predicted)'
+    ))
+    
+    fig.update_layout(
+        title='Step-by-Step Predictions',
+        xaxis_title='Date',
+        yaxis_title='Close Price',
+        template='plotly_white'
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
 
-# Streamlit UI
-st.title("Google GenAI Explanation")
 
-# st.write("**What would you like to know about the prediction?**")
-# st.text_area("", user_input, height=150)
-
-if st.button("Generate"):
-    # Automatically use the SHAP summary prompt text
-    # Make sure 'prompt_text' is already defined from your previous SHAP computation
-    if prompt_text.strip():  # check if prompt_text is not empty
-        generate(prompt_text)
-    else:
-        st.warning("SHAP summary is not available yet.")
 
 
 
