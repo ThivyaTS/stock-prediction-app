@@ -38,20 +38,18 @@ import logging
 import warnings
 
 import base64
-def set_scrollable_background(image_path: str):
+
+def set_scrollable_background(image_path):
     with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
-
     css = f"""
     <style>
     body {{
-        margin: 0;
-        padding: 0;
         background-image: url("data:image/jpeg;base64,{encoded}");
         background-repeat: no-repeat;
-        background-position: center;
         background-size: cover;
         background-attachment: scroll;
+        background-position: center;
     }}
     </style>
     """
