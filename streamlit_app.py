@@ -81,15 +81,11 @@ set_fixed_background("bg_thivya_web.jpg")
 # -------------------------
 # Title with small Apple image
 # -------------------------
-st.markdown(
-    """
-    <div style="text-align: center;">
-        <img src="apple_image.png" alt="Apple Logo" width="80">
-        <h2>📊 Stock Price Visualization</h2>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# Center image with markdown trick
+st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+st.image("apple_image.png", width=80)  # load PNG logo
+st.markdown("### 📊 Stock Price Visualization", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 st.title("Stock Price Visualization")
 
