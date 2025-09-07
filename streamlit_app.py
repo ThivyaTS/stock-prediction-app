@@ -150,7 +150,6 @@ fin_data = load_financial_data()
 # ----------------------------
 # Column layout: plot | table
 # ----------------------------
-col_chart, col_table = st.columns([3, 3])  # Adjust for perfect side-by-side fit
 
 # --- Load financial data ---
 @st.cache_data
@@ -192,7 +191,7 @@ table_data = table_data.reset_index(drop=True)
 # ----------------------------
 # Layout: Plot + Table Side-by-Side
 # ----------------------------
-col_chart, col_table = st.columns([3, 3])
+col_chart, col_table = st.columns([3, 2])
 
 # 📊 Plot (unchanged)
 with col_chart:
