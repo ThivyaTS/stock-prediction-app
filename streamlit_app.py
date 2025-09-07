@@ -147,14 +147,16 @@ def load_financial_data():
 
 fin_data = load_financial_data()
 
-# Column layout: chart | table
-col_chart, col_table = st.columns([2, 1])  # 2:1 ratio
+# ----------------------------
+# Column layout: plot | table
+# ----------------------------
+col_chart, col_table = st.columns([3, 1.2])  # Adjust for perfect side-by-side fit
 
-# --------------------------
+# ----------------------------
 # 📊 Plot: Revenue & Net Income
-# --------------------------
+# ----------------------------
 with col_chart:
-    st.subheader("Revenue vs Net Income (Bar Chart)")
+    st.subheader("Revenue vs Net Income")
 
     fig = go.Figure()
 
@@ -172,26 +174,27 @@ with col_chart:
         yaxis_title="Amount (raw scale)",
         template="plotly_white",
         height=500,
+        margin=dict(l=20, r=20, t=50, b=40)
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
-# --------------------------
-# 📋 Table: Remaining Metrics
-# --------------------------
+# ----------------------------
+# 📋 Table: Other Metrics (no index)
+# ----------------------------
 with col_table:
-    st.subheader("Other Key Metrics")
+    st.subheader("Other Metrics")
 
-    # Select only the remaining columns
+    # Only show these columns
     display_cols = ["year", "EPS", "Net profit margin", "EBITDA", "Operating expense"]
     table_data = fin_data[display_cols].copy()
-
-    # Optional: Round for readability
     table_data = table_data.round(2)
 
-    # Display the table
-    st.dataframe(table_data, use_container_width=True)
+    # Reset index to avoid showing it
+    table_data = table_data.reset_index(drop=True)
 
+    # Display table without index
+    st.table(table_data)
 
 
 
