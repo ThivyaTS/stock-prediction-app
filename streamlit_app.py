@@ -121,8 +121,8 @@ import plotly.graph_objects as go
 # Load saved model and scalers
 # -----------------------------
 model = keras.models.load_model("multivariate_lstm_model_aapl.keras")
-feature_scaler = joblib.load("feature_scaler_aapl.save")
-target_scaler = joblib.load("target_scaler_aapl.save")
+feature_scaler = joblib.load("feature_scaler_aapl_latest.save")
+target_scaler = joblib.load("target_scaler_aapl_latest.save")
 
 # -----------------------------
 # Load your dataset
