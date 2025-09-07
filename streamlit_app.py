@@ -328,9 +328,9 @@ if "predictions" not in st.session_state:
     st.session_state.predictions = dataFrame.copy()
 
 #new
-# Initialize to store only predicted rows
 if "predicted_rows" not in st.session_state:
-    st.session_state.predicted_rows = pd.DataFrame(columns=["Date", "Predicted Close"])
+    st.session_state.predicted_rows = pd.DataFrame(columns=["Date", "Previous Close", "Predicted Close"])
+
 
 
 # Button for next prediction
@@ -362,6 +362,8 @@ if st.button("🔮 Predict Next Step"):
     # Add prediction to session_state dataframe
     last_date = st.session_state.predictions.index[-1]
     pred_date = last_date + timedelta(days=1)
+    # Get previous close value
+    previous_close = st.session_state.predictions.loc[last_date, "Close"]
     st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
 
     st.success(f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**")
@@ -375,12 +377,14 @@ if st.button("🔮 Predict Next Step"):
     ))
     #new
     # Store predicted row
+    # Add to summary table
     st.session_state.predicted_rows = pd.concat([
         st.session_state.predicted_rows,
-        pd.DataFrame({
-            "Date": [pred_date],
-            "Predicted Close": [round(predicted_close, 2)]
-        })
+        pd.DataFrame([{
+            "Date": pred_date.strftime("%Y-%m-%d"),
+            "Previous Close": round(previous_close, 2),
+            "Predicted Close": round(predicted_close, 2)
+        }])
     ], ignore_index=True)
 
     fig.update_layout(
@@ -395,13 +399,15 @@ if st.button("🔮 Predict Next Step"):
     # -----------------------------
     # Show table of predicted rows
     # -----------------------------
-    st.subheader("📅 Predicted Rows")
+    st.subheader("📅 Prediction Summary Table")
 
-    # Format date nicely if needed
-    predicted_table = st.session_state.predicted_rows.copy()
-    predicted_table["Date"] = pd.to_datetime(predicted_table["Date"]).dt.strftime('%Y-%m-%d')
+    if not st.session_state.predicted_rows.empty:
+        predicted_table = st.session_state.predicted_rows.copy()
+        predicted_table["Date"] = pd.to_datetime(predicted_table["Date"]).dt.strftime('%Y-%m-%d')
 
-    st.dataframe(predicted_table, use_container_width=True, hide_index=True)
+        st.dataframe(predicted_table, use_container_width=True, hide_index=True)
+    else:
+        st.info("Click the '🔮 Predict Next Step' button to generate predictions.")
 
 
     # -----------------------------
