@@ -46,24 +46,23 @@ def add_blurred_background(image_path: str, blur_amount: int = 6):
 
     css = f"""
     <style>
-    body {{
-        background-image: url("data:image/jpeg;base64,{encoded_image}");
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: scroll;
-        background-position: center;
-        filter: blur({blur_amount}px);
-    }}
     .stApp {{
-        background-color: rgba(255, 255, 255, 0.75); /* Optional: light background for content readability */
-        backdrop-filter: blur(0px); /* Prevent double-blur effect */
+        background: url("data:image/jpeg;base64,{encoded_image}") no-repeat center center fixed;
+        background-size: cover;
+    }}
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur({blur_amount}px);
+        z-index: -1;
     }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
-
-# ✅ Call this early in the app
-add_blurred_background("bg_thivya_web.jpg", blur_amount=6)
 
 
 
@@ -84,6 +83,9 @@ st.set_page_config(
     page_title="Stock Dashboard",
     layout="wide"  # makes the page full-width
 )
+
+# ✅ Call this early in the app
+add_blurred_background("bg_thivya_web.jpg", blur_amount=6)
 
 st.title("Stock Price Visualization")
 
