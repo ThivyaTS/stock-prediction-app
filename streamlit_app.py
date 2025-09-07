@@ -150,8 +150,10 @@ with col2:
         yaxis_title='Volume',
         xaxis=dict(rangeslider=dict(visible=True)),
         template='plotly_white',
-        height=500  # taller figure
-    )    
+        height=500,
+        plot_bgcolor='rgba(255,255,255,0.5)',   # Plot area background (50% opacity white)
+        paper_bgcolor='rgba(255,255,255,0.5)'   # Outside area background (50% opacity white)
+    )
     st.plotly_chart(fig2, use_container_width=True)
 
 # --- Now add full-width graph below both ---
