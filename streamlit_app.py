@@ -39,25 +39,38 @@ import warnings
 
 import base64
 
-def set_safe_background(image_path, opacity=0.6):
-    with open(image_path, "rb") as f:
-        img_str = base64.b64encode(f.read()).decode()
-    st.markdown(f"""
-    <style>
-        .stApp {{
-            background: linear-gradient(
-                rgba(255,255,255,{1-opacity}), 
-                rgba(255,255,255,{1-opacity})
-            ),
-            url("data:image/jpg;base64,{img_str}") no-repeat center center;
-            background-size: cover;
-            background-attachment: scroll;
-        }}
-    </style>""", unsafe_allow_html=True
-    )
 
-# Call after set_page_config
-set_safe_background("bg_thivya_web.jpg", opacity=0.6)
+def set_blurred_background(image_path):
+    with open(image_path, "rb") as f:
+        encoded_image = base64.b64encode(f.read()).decode()
+
+    st.markdown(f"""
+        <style>
+        .stApp {{
+            background: none;
+            position: relative;
+        }}
+        .blur-bg {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            z-index: -1;
+            background-image: url("data:image/jpg;base64,{encoded_image}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: blur(8px);  /* 50% blur look */
+            opacity: 1;          /* keep it fully visible */
+        }}
+        </style>
+        <div class="blur-bg"></div>
+    """, unsafe_allow_html=True)
+
+# Call this once, after st.set_page_config()
+set_blurred_background("bg_thivya_web.jpg")
+
 
 
 
