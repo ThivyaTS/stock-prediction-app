@@ -8,6 +8,13 @@ import shap
 from tensorflow import keras
 import plotly.graph_objects as go
 import joblib
+import streamlit as st
+import pandas as pd
+import numpy as np
+from sklearn.impute import SimpleImputer
+import joblib
+from tensorflow import keras
+import plotly.graph_objects as go
 
 import streamlit as st
 import pandas as pd
@@ -117,16 +124,8 @@ with col2:
         xaxis=dict(rangeslider=dict(visible=True)),
         template='plotly_white',
         height=500  # taller figure
-    )
-    
-#     st.plotly_chart(fig2, use_container_width=True)
-import streamlit as st
-import pandas as pd
-import numpy as np
-from sklearn.impute import SimpleImputer
-import joblib
-from tensorflow import keras
-import plotly.graph_objects as go
+    )    
+    st.plotly_chart(fig2, use_container_width=True)
 
 # -----------------------------
 # Load saved model and scalers
