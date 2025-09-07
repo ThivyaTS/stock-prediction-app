@@ -285,7 +285,7 @@ for i, feature in enumerate(latest_scaled.columns):
 # -----------------------------
 # Convert JSON summary to prompt text
 # -----------------------------
-instruction = "Explain the feature contributions and their impact on the next-day Close prediction. Do NOT mention the model itself Explain in simple english for a non technical person.\n\n"
+instruction = "Explain the feature contributions and their impact on the next-day Close prediction.DO NOT Mention the numbers.Maybe tell in percentage.Do NOT mention the model itself. Explain in simple english for a non technical person.\n\n"
 
 prompt_lines = [instruction]  # start with instruction
 for feature, values in feature_summary.items():
