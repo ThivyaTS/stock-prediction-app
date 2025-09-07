@@ -151,8 +151,8 @@ with col2:
         xaxis=dict(rangeslider=dict(visible=True)),
         template='plotly_white',
         height=500,
-        plot_bgcolor='rgba(255,255,255,0.5)',   # Plot area background (50% opacity white)
-        paper_bgcolor='rgba(255,255,255,0.5)'   # Outside area background (50% opacity white)
+        plot_bgcolor='rgba(0,0,0,0)',   # transparent inside chart
+        paper_bgcolor='rgba(0,0,0,0)'   # transparent outside chart
     )
     st.plotly_chart(fig2, use_container_width=True)
 
