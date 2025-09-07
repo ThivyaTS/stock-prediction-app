@@ -84,9 +84,12 @@ set_fixed_background("bg_thivya_web.jpg")
 # -------------------------
 # Centered Apple logo + Title using columns
 # -------------------------
-col1, col2, col3 = st.columns([2.9, 4, 2])  # middle col is wider
+col1, col2, col3 = st.columns([2.9, 2, 2])  # middle col is wider
 with col2:
     st.image("apple_image.png", width=200)  # Apple logo
+
+col1, col2, col3 = st.columns([2.9, 4, 2])  # middle col is wider
+with col2:
     st.markdown(
       "<h1 style='font-size:36px; margin-top:10px;'>📊 Stock Price Visualization</h1>",
       unsafe_allow_html=True
