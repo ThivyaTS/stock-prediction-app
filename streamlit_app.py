@@ -495,11 +495,11 @@ if st.button("🔮 Predict Next Step"):
                 save_binary_file(f"{file_name}{file_extension}", data_buffer)
             else:
                 st.text(chunk.text)
-    
-# Streamlit UI
-st.title("Google GenAI Explanation")
-# prompt_text.strip()
-generate(prompt_text)
+      # Streamlit UI
+    st.title("Google GenAI Explanation")
+    prompt_text.strip()
+    generate(prompt_text)
+
 
 # st.write("**What would you like to know about the prediction?**")
 # st.text_area("", user_input, height=150)
