@@ -79,8 +79,6 @@ def set_blurred_background(image_path: str, blur_px: int = 6):
 
     st.markdown(css, unsafe_allow_html=True)
 
-# ✅ Call this early in the app
-set_blurred_background("bg_thivya_web.jpg", blur_px=6)
 
 
 
@@ -104,7 +102,7 @@ st.set_page_config(
 )
 
 # ✅ Call this early in the app
-add_blurred_background("bg_thivya_web.jpg", blur_amount=6)
+set_blurred_background("bg_thivya_web.jpg", blur_px=6)
 
 st.title("Stock Price Visualization")
 
