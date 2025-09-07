@@ -404,17 +404,18 @@ if st.button("🔮 Predict Next Step"):
     
     # Streamlit UI
     st.title("Google GenAI Explanation")
-    
+    prompt_text.strip()
+    generate(prompt_text)
     # st.write("**What would you like to know about the prediction?**")
     # st.text_area("", user_input, height=150)
     
-    if st.button("Generate"):
-        # Automatically use the SHAP summary prompt text
-        # Make sure 'prompt_text' is already defined from your previous SHAP computation
-        if prompt_text.strip():  # check if prompt_text is not empty
-            generate(prompt_text)
-        else:
-            st.warning("SHAP summary is not available yet.")
+    # if st.button("Generate"):
+    #     # Automatically use the SHAP summary prompt text
+    #     # Make sure 'prompt_text' is already defined from your previous SHAP computation
+    #     if prompt_text.strip():  # check if prompt_text is not empty
+            
+    #     else:
+    #         st.warning("SHAP summary is not available yet.")
     
     
     
