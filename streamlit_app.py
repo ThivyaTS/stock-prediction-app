@@ -75,7 +75,7 @@ col1, col2 = st.columns([4, 2])  # left column bigger
 # -------------------------
 with col1:
     st.subheader("AAPL Close Prices")
-    
+
     fig1 = go.Figure()
     fig1.add_trace(go.Scatter(
         x=data['Date'],
@@ -84,30 +84,27 @@ with col1:
         name='Close'
     ))
 
-    # max_date = data['Date'].max()
-
     fig1.update_layout(
         title="Close Prices",
         xaxis_title='Date',
         yaxis_title='Price',
         xaxis=dict(
-        rangeselector=dict(
-            buttons=list([
-                dict(count=1, label="1M", step="month", stepmode="backward"),
-                dict(count=6, label="6M", step="month", stepmode="backward"),
-                dict(count=1, label="1Y", step="year", stepmode="backward"),
-                dict(step="all")  # shows entire range
-            ])
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=1, label="1M", step="month", stepmode="backward"),
+                    dict(count=6, label="6M", step="month", stepmode="backward"),
+                    dict(count=1, label="1Y", step="year", stepmode="backward"),
+                    dict(step="all")
+                ])
+            ),
+            rangeslider=dict(visible=False),
+            type="date",
         ),
-        rangeslider=dict(visible=False),  # optional
-        type="date",
-        # range=[data['Date'].min(), max_date]  # show only dataset range
-    ),
+        template='plotly_white',
+        height=500
+    )
 
-    template='plotly_white',
-    height=500 
-    ) 
-  st.plotly_chart(fig1, use_container_width=True)
+    st.plotly_chart(fig1, use_container_width=True)
 
 # -------------------------
 # Right Column: Volume
