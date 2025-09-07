@@ -95,8 +95,6 @@ with col2:
       unsafe_allow_html=True
     )
 
-st.title("Stock Price Visualization")
-
 # Load dataset
 @st.cache_data  # caches the dataset for faster reload
 def load_data():
