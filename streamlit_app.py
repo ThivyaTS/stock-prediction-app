@@ -95,6 +95,9 @@ with col2:
       unsafe_allow_html=True
     )
 
+# --- Now add full-width graph below both ---
+st.markdown("---")  # optional horizontal divider
+
 # Load dataset
 @st.cache_data  # caches the dataset for faster reload
 def load_data():
