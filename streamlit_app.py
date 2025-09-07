@@ -16,6 +16,12 @@ import joblib
 from tensorflow import keras
 import plotly.graph_objects as go
 
+import base64
+import mimetypes
+import os
+import streamlit as st
+from google import genai
+from google.genai import types
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -293,94 +299,6 @@ for feature, values in feature_summary.items():
 
 prompt_text = "\n".join(prompt_lines)
 
-# st.write("LLM Prompt Text:")
-# st.text(prompt_text)
-# Display in Streamlit as table
-# st.write("Feature Summary (for LLM):")
-# st.json(feature_summary)
-
-# # -----------------------------
-# # LLM Explanation
-# # -----------------------------
-
-# shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
-# prompt_text = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
-# API_KEY = os.getenv("GEMINI_API_KEY")
-# if not API_KEY:
-#     st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
-#     st.stop()
-
-# client = genai.Client(api_key=API_KEY)
-
-# st.subheader("LLM Explanation")
-# topic = st.selectbox("Select explanation topic:", ["Predicted Close", "Predicted Open"])
-
-
-
-# st.text_area("LLM Prompt", prompt, height=200)
-
-# response = client.models.generate_content(
-#     model="gemini-2.5-flash",
-#     contents=prompt,
-#     max_output_tokens=300
-# )
-
-# st.text_area("LLM Response", response.text, height=300)
-
-# -----------------------------
-# LLM topic selection & prompt
-# -----------------------------
-
-# # --- Get API key from environment variable or Streamlit secrets ---
-# API_KEY = os.getenv("GEMINI_API_KEY")
-# if not API_KEY:
-#     st.error("GEMINI_API_KEY is missing! Add it in Streamlit Secrets.")
-#     st.stop()
-
-# # Initialize Gemini client
-# client = genai.Client(api_key=API_KEY)
-
-# st.title("Stock Prediction LLM Explainer")
-
-# # User input: dropdown or text
-# topic = st.selectbox("Choose a topic:", ["Predicted Close", "Predicted Open", "Artificial Intelligence", "Stock Market", "Crypto", "Finance"])
-# user_prompt = st.text_area("Or enter your own prompt:")
-
-# # Placeholder for SHAP text. You must populate this variable with your SHAP explanation text.
-# shap_text = "Example SHAP explanation text. You need to replace this with your actual SHAP data."
-
-# if st.button("Generate Content"):
-#     # Construct the prompt
-#     if user_prompt:
-#         prompt_text = user_prompt
-#     else:
-#         # Check if topic is a stock prediction type and use shap_text
-#         if topic in ["Predicted Close", "Predicted Open"]:
-#             prompt_text = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
-#         else:
-#             prompt_text = f"Explain {topic}." # A simple prompt for general topics
-
-#     try:
-#         # Generate content using Gemini 1.5 Flash
-#         response = client.models.generate_content(
-#             model="gemini-2.5-flash", contents="Explain how AI works in a few words"
-#         )
-        
-#         # Display the result
-#         st.subheader("Generated Content")
-#         st.write(response.text)
-
-#     except Exception as e:
-#         st.error(f"Error generating content: {e}")
-
-import base64
-import mimetypes
-import os
-import streamlit as st
-from google import genai
-from google.genai import types
-
-
 def save_binary_file(file_name, data):
     f = open(file_name, "wb")
     f.write(data)
@@ -445,7 +363,83 @@ if st.button("Generate"):
         st.warning("SHAP summary is not available yet.")
 
 
+#----------------------------------------------------------
+# ==============================
+# Continuous Prediction Section
+# ==============================
+import time
 
+# Session state to control loop
+if "predicting" not in st.session_state:
+    st.session_state.predicting = False
+
+# Start/Stop buttons
+colA, colB = st.columns(2)
+with colA:
+    if st.button("▶ Start Continuous Prediction"):
+        st.session_state.predicting = True
+with colB:
+    if st.button("⏹ Stop"):
+        st.session_state.predicting = False
+
+# Continuous loop
+placeholder_chart = st.empty()
+placeholder_text = st.empty()
+
+while st.session_state.predicting:
+    # -----------------------------
+    # Use last `window` rows (including new predictions if available)
+    # -----------------------------
+    latest_data = dataFrame[-window:].copy()
+    non_numeric_cols = latest_data.select_dtypes(exclude=np.number).columns
+    latest_data_numeric = latest_data.drop(columns=non_numeric_cols)
+
+    imputer = SimpleImputer()
+    latest_scaled = pd.DataFrame(
+        imputer.fit_transform(latest_data_numeric),
+        columns=latest_data_numeric.columns
+    )
+
+    latest_scaled = pd.DataFrame(
+        feature_scaler.transform(latest_scaled),
+        columns=latest_scaled.columns
+    )
+
+    X_input = latest_scaled.values.reshape(1, window, latest_scaled.shape[1])
+
+    # Predict next day Close
+    y_pred_scaled = model.predict(X_input)
+    y_pred = target_scaler.inverse_transform(y_pred_scaled)
+    predicted_close = y_pred[0][0]
+
+    # Add prediction to dataframe for chaining
+    last_date = dataFrame.index[-1]
+    pred_date = last_date + timedelta(days=1)
+    dataFrame.loc[pred_date, "Close"] = predicted_close
+
+    # -----------------------------
+    # Update figure
+    # -----------------------------
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=dataFrame.index[-(window+5):], 
+        y=dataFrame['Close'].iloc[-(window+5):], 
+        mode='lines+markers', 
+        name='Close (Actual + Predicted)'
+    ))
+
+    fig.update_layout(
+        title='Continuous Predictions',
+        xaxis_title='Date',
+        yaxis_title='Close Price',
+        template='plotly_white'
+    )
+
+    placeholder_chart.plotly_chart(fig, use_container_width=True)
+    placeholder_text.write(f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**")
+
+    # Sleep to avoid too-fast loop (adjust as needed)
+    time.sleep(2)
 
 
 
