@@ -494,8 +494,7 @@ def generate(user_input):
 # Streamlit UI
 st.title("Google GenAI Explanation")
 
-# User selects a prompt
-selected_prompt = st.selectbox("What would you like to know about the prediction?:", list(prompts.keys()))
+
 
 
 # st.write("**What would you like to know about the prediction?**")
@@ -504,6 +503,8 @@ selected_prompt = st.selectbox("What would you like to know about the prediction
 if st.button("Generate"):
       # Example mapping of prompts to pre-existing SHAP texts
       # Get the corresponding SHAP text
+  # User selects a prompt
+    selected_prompt = st.selectbox("What would you like to know about the prediction?:", list(prompts.keys()))
     user_input = prompts[selected_prompt]
     prompts = {
     "Prompt 1": f"Explain how the following features contributed to prediction:\n{shap_text}",
