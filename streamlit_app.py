@@ -41,42 +41,30 @@ import base64
 
 
 def set_blurred_background(image_path: str, blur_px: int = 6):
+    import base64
+
     with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
 
     css = f"""
     <style>
-    .stApp {{
-        background: none;
-        position: relative;
-        z-index: 0;
-    }}
-
-    .blur-bg-container {{
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-        overflow: hidden;
-    }}
-
-    .blur-bg-container::before {{
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+    body {{
         background-image: url("data:image/jpeg;base64,{encoded}");
+        background-repeat: no-repeat;
         background-size: cover;
-        background-position: center;
+        background-attachment: scroll;
         filter: blur({blur_px}px);
-        transform: scale(1.05);  /* prevents edges from cutting off */
+        margin: 0;
+        height: 100vh;
+        overflow: auto;
+    }}
+    .stApp {{
+        background-color: rgba(255, 255, 255, 0.75); /* white background with opacity */
+        position: relative;
+        z-index: 1;
+        padding: 1rem;
     }}
     </style>
-    <div class="blur-bg-container"></div>
     """
 
     st.markdown(css, unsafe_allow_html=True)
