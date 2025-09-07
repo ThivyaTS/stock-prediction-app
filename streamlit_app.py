@@ -39,36 +39,38 @@ import warnings
 
 import base64
 
-
 def set_blurred_background(image_path: str, blur_px: int = 6):
-    import base64
-
     with open(image_path, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
 
     css = f"""
     <style>
     body {{
+        margin: 0;
+        padding: 0;
+        overflow: auto;
         background-image: url("data:image/jpeg;base64,{encoded}");
         background-repeat: no-repeat;
+        background-position: center;
         background-size: cover;
         background-attachment: scroll;
         filter: blur({blur_px}px);
-        margin: 0;
+        position: fixed;
+        width: 100vw;
         height: 100vh;
-        overflow: auto;
+        z-index: -1;
     }}
     .stApp {{
-        background-color: rgba(255, 255, 255, 0.75); /* white background with opacity */
         position: relative;
+        background-color: rgba(255, 255, 255, 0.8); /* slightly translucent background */
         z-index: 1;
         padding: 1rem;
+        border-radius: 8px;
     }}
     </style>
     """
 
     st.markdown(css, unsafe_allow_html=True)
-
 
 
 
