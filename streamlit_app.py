@@ -231,7 +231,7 @@ import matplotlib.pyplot as plt
 # -----------------------------
 timesteps = X_input.shape[1]
 features = X_input.shape[2]
-
+X_train = np.load("X_train.npy")
 # Wrapper to let SHAP work with LSTM
 def model_predict_wrapper(X_flat):
     X_3d = X_flat.reshape(X_flat.shape[0], timesteps, features)
