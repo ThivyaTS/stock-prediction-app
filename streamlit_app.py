@@ -130,6 +130,53 @@ with col2:
     )    
     st.plotly_chart(fig2, use_container_width=True)
 
+# --- Now add full-width graph below both ---
+st.markdown("---")  # optional horizontal divider
+
+st.subheader("📊 Annual Financial Metrics")
+
+# Load financial data
+@st.cache_data
+def load_financial_data():
+    return pd.read_csv("aapl_fin.csv")
+
+fin_data = load_financial_data()
+
+# Preprocess
+fin_data.columns = fin_data.columns.str.strip()
+fin_data['year'] = pd.to_datetime(fin_data['year']).dt.year.astype(str)
+
+# Shorten column names
+metric_map = {
+    "EPS": "EPS",
+    "Net income": "Net Income",
+    "Revenue": "Revenue",
+    "Net profit margin": "Profit Margin (%)",
+    "EBITDA": "EBITDA",
+    "Operating expense": "OpEx"
+}
+
+fig3 = go.Figure()
+
+for metric in metric_map:
+    fig3.add_trace(go.Bar(
+        x=fin_data['year'],
+        y=fin_data[metric],
+        name=metric_map[metric]
+    ))
+
+fig3.update_layout(
+    title="Apple Financial Overview by Year",
+    barmode='group',
+    xaxis_title='Fiscal Year',
+    yaxis_title='Amount (scaled)',
+    template='plotly_white',
+    height=500
+)
+
+# Plot full-width
+st.plotly_chart(fig3, use_container_width=True)
+
 # -----------------------------
 # Load saved model and scalers
 # -----------------------------
