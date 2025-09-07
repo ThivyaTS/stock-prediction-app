@@ -39,40 +39,25 @@ import warnings
 
 import base64
 
-# Function to encode image to base64
-def get_base64_bg(image_path):
+def set_safe_background(image_path, opacity=0.6):
     with open(image_path, "rb") as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
-
-# Set background image (scrollable and 60% opacity)
-def set_background(image_file):
-    encoded_bg = get_base64_bg(image_file)
-    background_css = f"""
+        img_str = base64.b64encode(f.read()).decode()
+    st.markdown(f"""
     <style>
-    .stApp {{
-        background: url("data:image/jpg;base64,{encoded_bg}") no-repeat center center;
-        background-size: cover;
-        background-attachment: scroll;
-        position: relative;
-    }}
+        .stApp {{
+            background: linear-gradient(
+                rgba(255,255,255,{1-opacity}), 
+                rgba(255,255,255,{1-opacity})
+            ),
+            url("data:image/jpg;base64,{img_str}") no-repeat center center;
+            background-size: cover;
+            background-attachment: scroll;
+        }}
+    </style>""", unsafe_allow_html=True
+    )
 
-    .stApp::before {{
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255, 255, 255, 0.4); /* 0.4 = 60% image opacity */
-        z-index: -1;
-    }}
-    </style>
-    """
-    st.markdown(background_css, unsafe_allow_html=True)
-
-# Call the function
-set_background("bg_thivya_web.jpg")
+# Call after set_page_config
+set_safe_background("bg_thivya_web.jpg", opacity=0.6)
 
 
 
