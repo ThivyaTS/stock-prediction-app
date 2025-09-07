@@ -351,7 +351,7 @@ if st.button("🔮 Predict Next Step"):
     
     prompt_lines = [instruction]  # start with instruction
     for feature, values in feature_summary.items():
-        line = f"-{feature}: value = {values['value']:.2f}, SHAP importance = {values['shap_importance']:.4f }"
+        line = f"- {feature}: value = {values['value']:.2f}, SHAP importance = {values['shap_importance']:.4f}"
         prompt_lines.append(line)
     
     prompt_text = "\n".join(prompt_lines)
