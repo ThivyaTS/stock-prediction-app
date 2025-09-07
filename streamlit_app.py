@@ -40,18 +40,18 @@ import warnings
 import base64
 
 
-def set_blurred_background(image_path):
+def set_blurred_background(image_path: str, blur_px: int = 8):
     with open(image_path, "rb") as f:
         encoded_image = base64.b64encode(f.read()).decode()
 
-    st.markdown(f"""
+    css_code = f"""
         <style>
         .stApp {{
             background: none;
             position: relative;
         }}
         .blur-bg {{
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             height: 100%;
@@ -61,17 +61,15 @@ def set_blurred_background(image_path):
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
-            filter: blur(8px);  /* 50% blur look */
-            opacity: 1;          /* keep it fully visible */
+            filter: blur({blur_px}px);
         }}
         </style>
         <div class="blur-bg"></div>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(css_code, unsafe_allow_html=True)
 
-# Call this once, after st.set_page_config()
+# Usage:
 set_blurred_background("bg_thivya_web.jpg")
-
-
 
 
 
