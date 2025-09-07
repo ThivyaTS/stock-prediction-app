@@ -48,26 +48,28 @@ def set_background(image_file):
     encoded_bg = get_base64_bg(image_file)
     background_css = f"""
     <style>
-    .stApp {{
+    /* Fixed blurred background layer */
+    .blur-bg {{
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
         background-image: url("data:image/jpg;base64,{encoded_bg}");
         background-size: cover;
         background-repeat: no-repeat;
-        background-attachment: fixed;
-        filter: blur(8px);  /* approx 50% blur */
+        background-position: center;
+        filter: blur(8px);
+        z-index: -1;
+    }}
+
+    /* Make sure Streamlit app content sits above the background */
+    .stApp {{
         position: relative;
         z-index: 0;
     }}
-
-    /* Overlay to reduce blur on content */
-    .stApp > * {{
-        position: relative;
-        z-index: 1;
-        backdrop-filter: none;
-    }}
     </style>
+    <div class="blur-bg"></div>
     """
     st.markdown(background_css, unsafe_allow_html=True)
-
 
 
 
