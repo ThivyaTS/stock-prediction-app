@@ -126,8 +126,9 @@ with col1:
         ),
         template='plotly_white',
         height=500,
-        plot_bgcolor='rgba(0,0,0,0)',   # transparent chart area
-        paper_bgcolor='rgba(0,0,0,0)'   # transparent outside chart
+        plot_bgcolor='rgba(0,0,0,0.7)',   # chart area: black, 70% opacity
+        paper_bgcolor='rgba(0,0,0,0.7)'   # outside area: black, 70% opacity
+
     )
     st.plotly_chart(fig1, use_container_width=True)
 
