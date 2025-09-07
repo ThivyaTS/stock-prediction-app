@@ -192,7 +192,7 @@ table_data = table_data.reset_index(drop=True)
 # ----------------------------
 # Layout: Plot + Table Side-by-Side
 # ----------------------------
-col_chart, col_table = st.columns([3, 1.2])
+col_chart, col_table = st.columns([3, 3])
 
 # 📊 Plot (unchanged)
 with col_chart:
