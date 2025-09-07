@@ -150,7 +150,7 @@ fin_data = load_financial_data()
 # ----------------------------
 # Column layout: plot | table
 # ----------------------------
-col_chart, col_table = st.columns([3, 1.2])  # Adjust for perfect side-by-side fit
+col_chart, col_table = st.columns([3, 3])  # Adjust for perfect side-by-side fit
 
 # ----------------------------
 # 📊 Plot: Revenue & Net Income
@@ -180,7 +180,7 @@ with col_chart:
     st.plotly_chart(fig, use_container_width=True)
 
 # ----------------------------
-# 📋 Table: Other Metrics (no index)
+# 📋 Table: Other Metrics 
 # ----------------------------
 with col_table:
     st.subheader("Other Metrics")
