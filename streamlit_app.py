@@ -85,12 +85,7 @@ col1, col2 = st.columns([1, 8])  # image smaller, text larger
 with col1:
     st.image("apple_image.png", width=50)  # small logo
 with col2:
-    st.markdown(
-        "<h2 style='margin-top: 10px;'>📊 Stock Price Visualization</h2>",
-        unsafe_allow_html=True
-    )
-
-st.title("Stock Price Visualization")
+    st.title("Stock Price Visualization")
 
 # Load dataset
 @st.cache_data  # caches the dataset for faster reload
