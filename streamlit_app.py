@@ -377,15 +377,16 @@ if st.button("🔮 Predict Next Step"):
     ))
     #new
     # Store predicted row
-    # Add to summary table
-    st.session_state.predicted_rows = pd.concat([
-        st.session_state.predicted_rows,
-        pd.DataFrame([{
-            "Date": pred_date.strftime("%Y-%m-%d"),
-            "Previous Close": round(previous_close, 2),
-            "Predicted Close": round(predicted_close, 2)
-        }])
-    ], ignore_index=True)
+    # Avoid duplicate predictions (if somehow re-run)
+    if pred_date.strftime("%Y-%m-%d") not in st.session_state.predicted_rows["Date"].values:
+        st.session_state.predicted_rows = pd.concat([
+            st.session_state.predicted_rows,
+            pd.DataFrame([{
+                "Date": pred_date.strftime("%Y-%m-%d"),
+                "Previous Close": round(previous_close, 2),
+                "Predicted Close": round(predicted_close, 2)
+            }])
+        ], ignore_index=True)
 
     fig.update_layout(
         title='Step-by-Step Predictions',
