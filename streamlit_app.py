@@ -133,8 +133,6 @@ with col2:
 # --- Now add full-width graph below both ---
 st.markdown("---")  # optional horizontal divider
 
-st.subheader("📊 Annual Financial Metrics")
-
 # --- Load financial data ---
 @st.cache_data
 def load_financial_data():
