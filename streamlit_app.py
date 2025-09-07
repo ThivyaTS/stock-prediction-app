@@ -475,6 +475,7 @@ if st.button("🔮 Predict Next Step"):
         )
     
         file_index = 0
+        generated_text = ""  # <--- Initialize an empty string to collect text chunks
         for chunk in client.models.generate_content_stream(
             model=model,
             contents=contents,
@@ -494,7 +495,9 @@ if st.button("🔮 Predict Next Step"):
                 file_extension = mimetypes.guess_extension(inline_data.mime_type)
                 save_binary_file(f"{file_name}{file_extension}", data_buffer)
             else:
-                st.text(chunk.text)
+                generated_text += chunk.text + " "  # <--- Accumulate text chunks
+        return generated_text.strip()  # Return full concatenated text
+      
       # Streamlit UI
       # Streamlit UI
     st.markdown("## 📘 Stock Price Explanation Summary")
