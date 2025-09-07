@@ -376,6 +376,15 @@ if st.button("🔮 Predict Next Step"):
     )
     
     st.plotly_chart(fig, use_container_width=True)
+
+    # ↓↓↓ ADD THIS ↓↓↓
+    st.subheader("🧾 Input Data for This Prediction")
+
+    latest_display = latest_data.reset_index()
+    latest_display = latest_display.round(2)
+
+    st.dataframe(latest_display, use_container_width=True, hide_index=True)
+
     # -----------------------------
     # SHAP explainer for LSTM
     # -----------------------------
