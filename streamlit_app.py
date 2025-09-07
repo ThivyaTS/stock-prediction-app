@@ -35,7 +35,7 @@ st.title("Stock Price Visualization")
 # Load dataset
 @st.cache_data  # caches the dataset for faster reload
 def load_data():
-    data = pd.read_csv("dataFrame no last 5 rows.csv")
+    data = pd.read_csv("dataFrame no last 5 rows (1).csv")
     return data
 
 data = load_data()
@@ -127,7 +127,7 @@ target_scaler = joblib.load("target_scaler_aapl_latest.save")
 # -----------------------------
 # Load your dataset
 # -----------------------------
-dataFrame = pd.read_csv("dataFrame no last 5 rows.csv")
+dataFrame = pd.read_csv("dataFrame no last 5 rows (1).csv")
 dataFrame['Date'] = pd.to_datetime(dataFrame['Date'])
 dataFrame.set_index('Date', inplace=True)
 
