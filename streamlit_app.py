@@ -39,13 +39,11 @@ import warnings
 
 import base64
 
-# Function to encode image to base64
 def get_base64_bg(image_path):
     with open(image_path, "rb") as f:
         data = f.read()
     return base64.b64encode(data).decode()
 
-# Set background image
 def set_background(image_file):
     encoded_bg = get_base64_bg(image_file)
     background_css = f"""
@@ -54,21 +52,17 @@ def set_background(image_file):
         background-image: url("data:image/jpg;base64,{encoded_bg}");
         background-size: cover;
         background-repeat: no-repeat;
-        background-attachment: scroll;
-        opacity: 1;
-        position: relative;  /* ensure positioning context */
-        z-index: 0;          /* place below content */
+        background-attachment: fixed;
+        filter: blur(8px);  /* approx 50% blur */
+        position: relative;
+        z-index: 0;
     }}
 
-    .stApp::before {{
-        content: "";
-        position: absolute;   /* changed from fixed to absolute */
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-        background-color: rgba(255, 255, 255, 0.8); /* overlay with transparency */
-        z-index: -1;
+    /* Overlay to reduce blur on content */
+    .stApp > * {{
+        position: relative;
+        z-index: 1;
+        backdrop-filter: none;
     }}
     </style>
     """
