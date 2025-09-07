@@ -83,7 +83,7 @@ set_fixed_background("bg_thivya_web.jpg")
 # -------------------------
 col1, col2 = st.columns([1, 8])  # image smaller, text larger
 with col1:
-    st.image("apple_image.jpg", width=50)  # small logo
+    st.image("apple_image.png", width=50)  # small logo
 with col2:
     st.markdown(
         "<h2 style='margin-top: 10px;'>📊 Stock Price Visualization</h2>",
