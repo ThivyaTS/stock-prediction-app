@@ -264,11 +264,27 @@ if st.button("🔮 Predict Next Step"):
 
     # Add prediction to session_state dataframe
     last_date = st.session_state.predictions.index[-1]
-    pred_date = last_date + timedelta(days=3)
+    pred_date = last_date + timedelta(days=1)
     st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
 
     st.success(f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**")
-
+    # Plot updated figure
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=st.session_state.predictions.index[-(window+10):], 
+        y=st.session_state.predictions['Close'].iloc[-(window+10):], 
+        mode='lines+markers', 
+        name='Close (Actual + Predicted)'
+    ))
+    
+    fig.update_layout(
+        title='Step-by-Step Predictions',
+        xaxis_title='Date',
+        yaxis_title='Close Price',
+        template='plotly_white'
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
     # -----------------------------
     # SHAP explainer for LSTM
     # -----------------------------
@@ -400,23 +416,7 @@ if st.button("🔮 Predict Next Step"):
         else:
             st.warning("SHAP summary is not available yet.")
     
-    # Plot updated figure
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=st.session_state.predictions.index[-(window+10):], 
-        y=st.session_state.predictions['Close'].iloc[-(window+10):], 
-        mode='lines+markers', 
-        name='Close (Actual + Predicted)'
-    ))
     
-    fig.update_layout(
-        title='Step-by-Step Predictions',
-        xaxis_title='Date',
-        yaxis_title='Close Price',
-        template='plotly_white'
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
     
 
 
