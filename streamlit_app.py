@@ -153,80 +153,140 @@ dataFrame.set_index('Date', inplace=True)
 window = 20
 latest_data = dataFrame[-window:].copy()
 
-# -----------------------------
-# Drop non-numeric columns (e.g., ticker or strings)
-# -----------------------------
-non_numeric_cols = latest_data.select_dtypes(exclude=np.number).columns
-latest_data_numeric = latest_data.drop(columns=non_numeric_cols)
+# # -----------------------------
+# # Drop non-numeric columns (e.g., ticker or strings)
+# # -----------------------------
+# non_numeric_cols = latest_data.select_dtypes(exclude=np.number).columns
+# latest_data_numeric = latest_data.drop(columns=non_numeric_cols)
 
-# -----------------------------
-# Impute missing numeric values
-# -----------------------------
-imputer = SimpleImputer()
-latest_scaled = pd.DataFrame(
-    imputer.fit_transform(latest_data_numeric),
-    columns=latest_data_numeric.columns
-)
+# # -----------------------------
+# # Impute missing numeric values
+# # -----------------------------
+# imputer = SimpleImputer()
+# latest_scaled = pd.DataFrame(
+#     imputer.fit_transform(latest_data_numeric),
+#     columns=latest_data_numeric.columns
+# )
 
-# -----------------------------
-# Scale features
-# -----------------------------
-latest_scaled = pd.DataFrame(
-    feature_scaler.transform(latest_scaled),
-    columns=latest_scaled.columns
-)
+# # -----------------------------
+# # Scale features
+# # -----------------------------
+# latest_scaled = pd.DataFrame(
+#     feature_scaler.transform(latest_scaled),
+#     columns=latest_scaled.columns
+# )
 
-# -----------------------------
-# Reshape for LSTM (samples, timesteps, features)
-# -----------------------------
-X_input = latest_scaled.values.reshape(1, window, latest_scaled.shape[1])
+# # -----------------------------
+# # Reshape for LSTM (samples, timesteps, features)
+# # -----------------------------
+# X_input = latest_scaled.values.reshape(1, window, latest_scaled.shape[1])
 
-# -----------------------------
-# Predict next day Close
-# -----------------------------
-y_pred_scaled = model.predict(X_input)
-y_pred = target_scaler.inverse_transform(y_pred_scaled)
-predicted_close = y_pred[0][0]
-from datetime import timedelta
+# # -----------------------------
+# # Predict next day Close
+# # -----------------------------
+# y_pred_scaled = model.predict(X_input)
+# y_pred = target_scaler.inverse_transform(y_pred_scaled)
+# predicted_close = y_pred[0][0]
+# from datetime import timedelta
 
-# Ensure last_date is a Timestamp
-last_date = pd.to_datetime(dataFrame.index[-1])
+# # Ensure last_date is a Timestamp
+# last_date = pd.to_datetime(dataFrame.index[-1])
 
-# Add 3 days to skip weekend
-pred_date = last_date + timedelta(days=3)
+# # Add 3 days to skip weekend
+# pred_date = last_date + timedelta(days=3)
 
-# -----------------------------
-# Visualization
-# -----------------------------
+# # -----------------------------
+# # Visualization
+# # -----------------------------
+# fig = go.Figure()
+
+# # Plot last 20 actual Close values
+# fig.add_trace(go.Scatter(
+#     x=dataFrame.index[-window:], 
+#     y=dataFrame['Close'][-window:], 
+#     mode='lines', 
+#     name='Actual Close'
+# ))
+
+# # Plot predicted next day
+# # pred_date = dataFrame.index[-1] + pd.Timedelta(days=1)
+# fig.add_trace(go.Scatter(
+#     x=[pred_date],
+#     y=[predicted_close],
+#     mode='markers',
+#     name='Predicted Close',
+#     marker=dict(color='red', size=10)
+# ))
+
+# fig.update_layout(
+#     title='Latest Close Prices + Next Day Prediction',
+#     xaxis_title='Date',
+#     yaxis_title='Close Price',
+#     template='plotly_white'
+# )
+
+# st.plotly_chart(fig, use_container_width=True)
+# st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}**")
+#----------------------------------------------------------
+# ==============================
+# Step-by-Step Prediction Section
+# ==============================
+
+# Initialize storage for predictions if not already present
+if "predictions" not in st.session_state:
+    st.session_state.predictions = dataFrame.copy()
+
+# Button for next prediction
+if st.button("🔮 Predict Next Step"):
+    # Take latest window rows
+    latest_data = st.session_state.predictions[-window:].copy()
+    non_numeric_cols = latest_data.select_dtypes(exclude=np.number).columns
+    latest_data_numeric = latest_data.drop(columns=non_numeric_cols)
+
+    imputer = SimpleImputer()
+    latest_scaled = pd.DataFrame(
+        imputer.fit_transform(latest_data_numeric),
+        columns=latest_data_numeric.columns
+    )
+
+    latest_scaled = pd.DataFrame(
+        feature_scaler.transform(latest_scaled),
+        columns=latest_scaled.columns
+    )
+
+    X_input = latest_scaled.values.reshape(1, window, latest_scaled.shape[1])
+
+    # Predict next day Close
+    y_pred_scaled = model.predict(X_input)
+    y_pred = target_scaler.inverse_transform(y_pred_scaled)
+    predicted_close = y_pred[0][0]
+
+    # Add prediction to session_state dataframe
+    last_date = st.session_state.predictions.index[-1]
+    pred_date = last_date + timedelta(days=3)
+    st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
+
+    st.success(f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**")
+
+# Plot updated figure
 fig = go.Figure()
-
-# Plot last 20 actual Close values
 fig.add_trace(go.Scatter(
-    x=dataFrame.index[-window:], 
-    y=dataFrame['Close'][-window:], 
-    mode='lines', 
-    name='Actual Close'
-))
-
-# Plot predicted next day
-# pred_date = dataFrame.index[-1] + pd.Timedelta(days=1)
-fig.add_trace(go.Scatter(
-    x=[pred_date],
-    y=[predicted_close],
-    mode='markers',
-    name='Predicted Close',
-    marker=dict(color='red', size=10)
+    x=st.session_state.predictions.index[-(window+10):], 
+    y=st.session_state.predictions['Close'].iloc[-(window+10):], 
+    mode='lines+markers', 
+    name='Close (Actual + Predicted)'
 ))
 
 fig.update_layout(
-    title='Latest Close Prices + Next Day Prediction',
+    title='Step-by-Step Predictions',
     xaxis_title='Date',
     yaxis_title='Close Price',
     template='plotly_white'
 )
 
 st.plotly_chart(fig, use_container_width=True)
-st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}**")
+
+
 
 import shap
 import matplotlib.pyplot as plt
@@ -363,64 +423,6 @@ if st.button("Generate"):
         st.warning("SHAP summary is not available yet.")
 
 
-#----------------------------------------------------------
-# ==============================
-# Step-by-Step Prediction Section
-# ==============================
-
-# Initialize storage for predictions if not already present
-if "predictions" not in st.session_state:
-    st.session_state.predictions = dataFrame.copy()
-
-# Button for next prediction
-if st.button("🔮 Predict Next Step"):
-    # Take latest window rows
-    latest_data = st.session_state.predictions[-window:].copy()
-    non_numeric_cols = latest_data.select_dtypes(exclude=np.number).columns
-    latest_data_numeric = latest_data.drop(columns=non_numeric_cols)
-
-    imputer = SimpleImputer()
-    latest_scaled = pd.DataFrame(
-        imputer.fit_transform(latest_data_numeric),
-        columns=latest_data_numeric.columns
-    )
-
-    latest_scaled = pd.DataFrame(
-        feature_scaler.transform(latest_scaled),
-        columns=latest_scaled.columns
-    )
-
-    X_input = latest_scaled.values.reshape(1, window, latest_scaled.shape[1])
-
-    # Predict next day Close
-    y_pred_scaled = model.predict(X_input)
-    y_pred = target_scaler.inverse_transform(y_pred_scaled)
-    predicted_close = y_pred[0][0]
-
-    # Add prediction to session_state dataframe
-    last_date = st.session_state.predictions.index[-1]
-    pred_date = last_date + timedelta(days=1)
-    st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
-
-    st.success(f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**")
-
-# Plot updated figure
-fig = go.Figure()
-fig.add_trace(go.Scatter(
-    x=st.session_state.predictions.index[-(window+10):], 
-    y=st.session_state.predictions['Close'].iloc[-(window+10):], 
-    mode='lines+markers', 
-    name='Close (Actual + Predicted)'
-))
-
-fig.update_layout(
-    title='Step-by-Step Predictions',
-    xaxis_title='Date',
-    yaxis_title='Close Price',
-    template='plotly_white'
-)
-
-st.plotly_chart(fig, use_container_width=True)
 
 
 
