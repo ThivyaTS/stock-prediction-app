@@ -59,12 +59,14 @@ def set_background(image_file):
         background-position: center;
         filter: blur(8px);
         z-index: -1;
+        pointer-events: none;  /* Make sure clicks pass through */
     }}
 
-    /* Make sure Streamlit app content sits above the background */
+    /* Streamlit app container */
     .stApp {{
         position: relative;
         z-index: 0;
+        background-color: rgba(255, 255, 255, 0.7); /* Optional: add slight white background so text is readable */
     }}
     </style>
     <div class="blur-bg"></div>
