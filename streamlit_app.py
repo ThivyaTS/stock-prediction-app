@@ -285,7 +285,9 @@ st.json(feature_summary)
 # -----------------------------
 # Convert JSON summary to prompt text
 # -----------------------------
-prompt_lines = ["Feature contributions for next-day Close prediction:\n"]
+instruction = "Explain the feature contributions and their impact on the next-day Close prediction. Do NOT mention the model itself Explain in simple english for a non technical person.\n\n"
+
+prompt_lines = [instruction]  # start with instruction
 for feature, values in feature_summary.items():
     line = f"- {feature}: value = {values['value']:.2f}, SHAP importance = {values['shap_importance']:.4f}"
     prompt_lines.append(line)
