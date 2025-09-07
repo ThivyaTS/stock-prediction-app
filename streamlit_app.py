@@ -128,7 +128,7 @@ target_scaler = joblib.load("target_scaler_aapl.save")
 # Load your dataset
 # -----------------------------
 dataFrame = pd.read_csv("dataFrame no last 5 rows.csv")
-dataFrame['Date'] = pd.to_datetime(dataFrame['Date'])
+# dataFrame['Date'] = pd.to_datetime(dataFrame['Date'])
 dataFrame.set_index('Date', inplace=True)
 
 # -----------------------------
