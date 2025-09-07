@@ -445,7 +445,11 @@ if st.button("🔮 Predict Next Step"):
         line = f"- {feature}: value = {values['value']:.2f}, SHAP importance = {values['shap_importance']:.4f}"
         prompt_lines.append(line)
 
-    prompt_text = "\n".join(prompt_lines)
+    # Join all phrases into a single paragraph
+    paragraph = ", ".join(feature_phrases[:-1]) + ", and " + feature_phrases[-1] + "."
+
+    # Combine everything into prompt_text
+    prompt_text = instruction + paragraph + " Overall, these features shaped the predicted price for today."
     
     def save_binary_file(file_name, data):
         f = open(file_name, "wb")
