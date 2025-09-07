@@ -496,25 +496,21 @@ if st.button("🔮 Predict Next Step"):
             else:
                 st.text(chunk.text)
     
-# Streamlit UI - Clean Google GenAI Explanation Section
-with st.container():
-    st.title("🧠 Google GenAI Explanation")
+# Streamlit UI
+st.title("Google GenAI Explanation")
+prompt_text.strip()
+generate(prompt_text)
 
-    # Show the prompt text in an expandable code box, safely
-    with st.expander("📋 View Prompt Text Being Sent to Google GenAI", expanded=False):
-        if prompt_text and isinstance(prompt_text, str):
-            st.code(prompt_text.strip(), language='markdown')
-        else:
-            st.info("Prompt text is not available yet.")
+# st.write("**What would you like to know about the prediction?**")
+# st.text_area("", user_input, height=150)
 
-    st.markdown("Click the button below to generate a plain-language explanation of today's stock price prediction.")
-
-    # Generate button
-    if st.button("💬 Generate Explanation"):
-        with st.spinner("Generating explanation using Google GenAI..."):
-            generate(prompt_text)
-
-        st.success("Explanation generated successfully!")
+# if st.button("Generate"):
+#     # Automatically use the SHAP summary prompt text
+#     # Make sure 'prompt_text' is already defined from your previous SHAP computation
+#     if prompt_text.strip():  # check if prompt_text is not empty
+#         pass
+#     else:
+#         st.warning("SHAP summary is not available yet.")
 
 
     
