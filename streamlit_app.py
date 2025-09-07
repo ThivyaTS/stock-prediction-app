@@ -225,30 +225,34 @@ st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}
 
 import shap
 
-# Flatten the LSTM input: (samples, timesteps * features)
+# Flatten input: (samples, timesteps * features)
 X_input_flat = X_input.reshape(X_input.shape[0], -1)
 background_flat = X_input_flat  # small background
 
-# Define KernelExplainer
-explainer = shap.KernelExplainer(lambda x: model.predict(x.reshape(x.shape[0], window, latest_scaled.shape[1])), background_flat)
+# KernelExplainer with lambda to reshape back to LSTM shape
+explainer = shap.KernelExplainer(
+    lambda x: model.predict(x.reshape(x.shape[0], window, latest_scaled.shape[1])),
+    background_flat
+)
 
 # Compute SHAP values
-shap_values = explainer.shap_values(X_input_flat)
+shap_values = explainer.shap_values(X_input_flat)  # list of arrays, one per output
 
-# Convert to DataFrame for display
+# Flattened SHAP values array
+shap_array = shap_values[0]  # shape: (samples, timesteps * features)
+
+# Generate proper feature names: feature_timestep
 feature_names = [f"{col}_t{t}" for t in range(window) for col in latest_scaled.columns]
-shap_df = pd.DataFrame(shap_values[0], columns=feature_names)
+
+# Check shapes before creating DataFrame
+print("SHAP shape:", shap_array.shape)
+print("Number of feature names:", len(feature_names))
+
+# Now create DataFrame safely
+shap_df = pd.DataFrame(shap_array, columns=feature_names)
 
 st.write("SHAP values for latest input features:")
 st.dataframe(shap_df.T)
-
-
-# Aggregate SHAP values per feature
-shap_values_array = shap_values[0].reshape(window, num_features)
-feature_importance = np.abs(shap_values_array).sum(axis=0)
-feature_names = latest_scaled.columns
-shap_summary = dict(zip(feature_names, feature_importance))
-shap_summary_sorted = dict(sorted(shap_summary.items(), key=lambda x: x[1], reverse=True))
 
 # # -----------------------------
 # # LLM Explanation
