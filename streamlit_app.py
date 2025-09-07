@@ -106,8 +106,8 @@ with col1:
 
     template='plotly_white',
     height=500 
-) 
-st.plotly_chart(fig1, use_container_width=True)
+    ) 
+  st.plotly_chart(fig1, use_container_width=True)
 
 # -------------------------
 # Right Column: Volume
