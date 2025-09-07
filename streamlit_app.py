@@ -38,7 +38,6 @@ import logging
 import warnings
 
 import base64
-import streamlit as st
 
 # Function to encode image to base64
 def get_base64_bg(image_path):
