@@ -440,23 +440,12 @@ if st.button("🔮 Predict Next Step"):
     (e.g., 'slightly increased', 'pushed down strongly'). Summarize the most important drivers, and highlight why today’s prediction looks the way it does. Avoid showing raw numbers — 
     use percentages or qualitative terms instead.SUMMMARIZE ALL OF THEM IN JUST 50 words. Avoid using special characters like (*?!$)\n\n"""
     
-    instruction = (
-        f"On {pred_date.date()}, the predicted stock price was influenced by the following factors: "
-    )
-
-    # Convert each feature's SHAP summary into a sentence-like phrase
-    feature_phrases = []
+    prompt_lines = [instruction]  # start with instruction
     for feature, values in feature_summary.items():
-        influence = "pushed up" if values["shap_importance"] > 0 else "pulled down"
-        feature_phrases.append(
-            f"{feature} ({values['value']:.2f}) {influence} the prediction"
-        )
-
-    # Join all phrases into a single paragraph
-    paragraph = ", ".join(feature_phrases[:-1]) + ", and " + feature_phrases[-1] + "."
-
-    # Combine everything into prompt_text
-    prompt_text = instruction + paragraph + " Overall, these features shaped the predicted price for today."
+        line = f"- {feature}: value = {values['value']:.2f}, SHAP importance = {values['shap_importance']:.4f}"
+        prompt_lines.append(line)
+    
+    prompt_text = "\n".join(prompt_lines)
     
     def save_binary_file(file_name, data):
         f = open(file_name, "wb")
