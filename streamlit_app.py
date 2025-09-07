@@ -152,12 +152,51 @@ fin_data = load_financial_data()
 # ----------------------------
 col_chart, col_table = st.columns([3, 3])  # Adjust for perfect side-by-side fit
 
+# --- Load financial data ---
+@st.cache_data
+def load_financial_data():
+    df = pd.read_csv("aapl_fin.csv")
+    df = df.dropna(how='all')  # Drop empty rows
+    df.columns = df.columns.str.strip()
+    df['year'] = pd.to_datetime(df['year'], errors='coerce').dt.year
+    df = df.dropna(subset=['year'])
+    df['year'] = df['year'].astype(int).astype(str)
+    df = df.sort_values('year')
+    return df
+
+fin_data = load_financial_data()
+
 # ----------------------------
-# 📊 Plot: Revenue & Net Income
+# Format numbers to billions (e.g., 80000000000 -> 80B)
 # ----------------------------
+def format_billions(value):
+    if pd.isna(value):
+        return "-"
+    return f"{value / 1e9:.0f}B"
+
+# Select only columns to display in the table
+display_cols = ["year", "EPS", "Net profit margin", "EBITDA", "Operating expense"]
+table_data = fin_data[display_cols].copy()
+
+# Format the large financial numbers
+table_data["EBITDA"] = table_data["EBITDA"].apply(format_billions)
+table_data["Operating expense"] = table_data["Operating expense"].apply(format_billions)
+
+# Optional: round EPS and margin
+table_data["EPS"] = table_data["EPS"].round(2)
+table_data["Net profit margin"] = table_data["Net profit margin"].round(2)
+
+# Reset index to remove index column in table
+table_data = table_data.reset_index(drop=True)
+
+# ----------------------------
+# Layout: Plot + Table Side-by-Side
+# ----------------------------
+col_chart, col_table = st.columns([3, 1.2])
+
+# 📊 Plot (unchanged)
 with col_chart:
     st.subheader("Revenue vs Net Income")
-
     fig = go.Figure()
 
     for metric in ["Revenue", "Net income"]:
@@ -179,21 +218,9 @@ with col_chart:
 
     st.plotly_chart(fig, use_container_width=True)
 
-# ----------------------------
-# 📋 Table: Other Metrics 
-# ----------------------------
+# 📋 Table with formatted billions
 with col_table:
     st.subheader("Other Metrics")
-
-    # Only show these columns
-    display_cols = ["year", "EPS", "Net profit margin", "EBITDA", "Operating expense"]
-    table_data = fin_data[display_cols].copy()
-    table_data = table_data.round(2)
-
-    # Reset index to avoid showing it
-    table_data = table_data.reset_index(drop=True)
-
-    # Display table without index
     st.table(table_data)
 
 
