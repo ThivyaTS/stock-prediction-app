@@ -224,43 +224,54 @@ st.plotly_chart(fig, use_container_width=True)
 st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}**")
 
 import shap
+import matplotlib.pyplot as plt
 
 # -----------------------------
 # SHAP explainer for LSTM
 # -----------------------------
-timesteps = X_input.shape[1]  # same as window
-features = X_input.shape[2]   # number of features
+timesteps = X_input.shape[1]
+features = X_input.shape[2]
 
 # Wrapper to let SHAP work with LSTM
 def model_predict_wrapper(X_flat):
     X_3d = X_flat.reshape(X_flat.shape[0], timesteps, features)
     return model.predict(X_3d)
 
-# Use a small background set (SHAP is expensive)
-background = X_input  # since only latest 20 rows are available
+# -----------------------------
+# Background dataset: 20 sequences from training set
+# -----------------------------
+import numpy as np
+num_bg = min(30, X_train.shape[0])
+idx = np.random.choice(X_train.shape[0], num_bg, replace=False)
+background = X_train[idx]  # shape: (num_bg, timesteps, features)
 background_flat = background.reshape(background.shape[0], -1)
 
+# -----------------------------
 # Initialize KernelExplainer
+# -----------------------------
 explainer = shap.KernelExplainer(model_predict_wrapper, background_flat)
 
-# Use the same input (latest_data) for explanation
-X_sample_flat = X_input.reshape(X_input.shape[0], -1)
+# -----------------------------
+# Sample to explain: latest row
+# -----------------------------
+X_sample_flat = X_input.reshape(X_input.shape[0], -1)  # (1, timesteps*features)
 
 # Compute SHAP values
 shap_values = explainer.shap_values(X_sample_flat)
+
 # -----------------------------
 # Aggregate SHAP over timesteps
 # -----------------------------
 sv_3d = shap_values[0].reshape(X_input.shape[0], timesteps, features)
-sv_sum = np.sum(sv_3d, axis=1)  # sum over timesteps → (samples, features)
+sv_sum = np.sum(sv_3d, axis=1)  # (samples, features)
 
-# Aggregate input features over timesteps
+# Average input across timesteps to match shape
 X_agg = np.mean(X_input, axis=1)  # (samples, features)
 
-# Display SHAP summary
-import matplotlib.pyplot as plt
-
-st.write("SHAP Feature-level Importance:")
+# -----------------------------
+# Display in Streamlit
+# -----------------------------
+st.write("SHAP Feature-level Importance for Latest Row:")
 fig, ax = plt.subplots(figsize=(8,5))
 shap.summary_plot(
     sv_sum,
@@ -269,6 +280,7 @@ shap.summary_plot(
     show=False
 )
 st.pyplot(fig)
+
 # # -----------------------------
 # # LLM Explanation
 # # -----------------------------
