@@ -242,7 +242,7 @@ col_chart, col_table = st.columns([3, 2])
 
 # 📊 Plot (unchanged)
 with col_chart:
-    st.subheader("Revenue vs Net Income")
+    st.subheader("Revenue & Net Income")
     fig = go.Figure()
 
     for metric in ["Revenue", "Net income"]:
@@ -383,7 +383,7 @@ if "predicted_rows" not in st.session_state:
 
 
 # Button for next prediction
-if st.button("🔮 Predict Next Step"):
+if st.button("🔮 Predict Next Day Close Price"):
     
     # Take latest window rows
     latest_data = st.session_state.predictions[-window:].copy()
@@ -524,7 +524,7 @@ if st.button("🔮 Predict Next Step"):
     instruction = f""" For {pred_date} date. DO NOT SHOW NUMBERS. Explain how each today's stock price feature influenced tommorow’s stock price prediction. Use the SHAP importance values to describe whether a feature pushed the predicted price higher or lower 
     compared to the average. Do not mention technical terms like SHAP and its VALUES or the model — instead, explain in plain language. Focus on the relative contribution of each feature, using everyday examples 
     (e.g., 'slightly increased', 'pushed down strongly'). Summarize the most important drivers, and highlight why today’s prediction looks the way it does. Avoid showing raw numbers — 
-    use percentages terms instead.SUMMMARIZE ALL OF THEM IN JUST 50 words. Avoid using special characters like (*?!$)"\n"\n"""
+    use percentages terms instead.SUMMMARIZE ALL OF THEM IN JUST 50 words. Give little not too much financial literacy on the summarization. Avoid using special characters like (*?!$)"\n"\n"""
     
     prompt_lines = [instruction]  # start with instruction
     for feature, values in feature_summary.items():
