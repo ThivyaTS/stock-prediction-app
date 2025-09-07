@@ -133,80 +133,54 @@ with col2:
 # --- Now add full-width graph below both ---
 st.markdown("---")  # optional horizontal divider
 
-# Load and clean financial data
+# --- Load financial data ---
 @st.cache_data
 def load_financial_data():
     df = pd.read_csv("aapl_fin.csv")
-    df = df.dropna(how='all')
+    df = df.dropna(how='all')  # Drop empty rows
     df.columns = df.columns.str.strip()
     df['year'] = pd.to_datetime(df['year'], errors='coerce').dt.year
-    df = df.dropna(subset=['year'])
+    df = df.dropna(subset=['year'])  # Drop rows where date couldn't be parsed
     df['year'] = df['year'].astype(int).astype(str)
     df = df.sort_values('year')
     return df
 
 fin_data = load_financial_data()
 
-# Metrics split by scale
-primary_metrics = ["Net income", "Revenue", "EBITDA", "Operating expense"]
-secondary_metrics = ["EPS", "Net profit margin"]
-
+# Map shorter names
 metric_map = {
+    "EPS": "EPS",
     "Net income": "Net Income",
     "Revenue": "Revenue",
+    "Net profit margin": "Profit Margin (%)",
     "EBITDA": "EBITDA",
-    "Operating expense": "OpEx",
-    "EPS": "EPS",
-    "Net profit margin": "Profit Margin (%)"
+    "Operating expense": "OpEx"
 }
 
-fig = go.Figure()
+# --- Plot ---
+fig3 = go.Figure()
 
-# Primary Y-axis bars
-for metric in primary_metrics:
+for metric in metric_map:
     if metric in fin_data.columns:
-        fig.add_trace(go.Bar(
+        fig3.add_trace(go.Bar(
             x=fin_data['year'],
             y=fin_data[metric],
-            name=metric_map[metric],
-            yaxis='y',
+            name=metric_map[metric]
         ))
 
-# Secondary Y-axis bars (smaller-scale metrics)
-for metric in secondary_metrics:
-    if metric in fin_data.columns:
-        fig.add_trace(go.Bar(
-            x=fin_data['year'],
-            y=fin_data[metric],
-            name=metric_map[metric],
-            yaxis='y2',
-            opacity=0.7
-        ))
-
-# Update layout with dual axes
-fig.update_layout(
-    title="Apple Financial Overview by Year (Dual Axis)",
+fig3.update_layout(
+    title="Apple Financial Overview by Year",
     barmode='group',
-    xaxis_title="Fiscal Year",
-    yaxis=dict(
-        title="Amount (in $)",
-        side='left',
-        showgrid=False
-    ),
-    yaxis2=dict(
-        title="EPS / Profit Margin (%)",
-        overlaying='y',
-        side='right',
-        showgrid=False
-    ),
-    legend=dict(x=0.01, y=1.15, orientation='h'),
-    height=550,
-    template='plotly_white'
+    xaxis_title='Fiscal Year',
+    yaxis_title='Amount (raw scale)',
+    template='plotly_white',
+    height=500
 )
 
-# Display the chart
+# --- Display full-width chart ---
 st.subheader("📊 Annual Financial Metrics")
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig3, use_container_width=True)
+
 
 
 # -----------------------------
