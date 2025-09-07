@@ -499,19 +499,19 @@ if st.button("🔮 Predict Next Step"):
       # Streamlit UI
     st.markdown("## 📘 Stock Price Explanation Summary")
 
-    # Clean and prepare prompt_text as a single paragraph
-    prompt_text = " ".join(prompt_text.split())
-
-    # Nicely styled text container
     with st.container():
         st.markdown(
-            f"""
+            """
             <div style="background-color:#f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
-                  <p style="font-size: 16px; line-height: 1.6; color: #333;">{prompt_text}</p>
-            </div>
-             """,
+            """,
             unsafe_allow_html=True
-         )
+        )
+
+        # Call your generator here — it streams text using st.text() or similar
+        prompt_text.strip()
+        generate(prompt_text)
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 # st.write("**What would you like to know about the prediction?**")
