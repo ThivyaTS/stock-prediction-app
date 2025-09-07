@@ -267,17 +267,33 @@ sv_sum = np.sum(sv_3d, axis=1)  # (samples, features)
 
 # Average input across timesteps to match shape
 X_agg = np.mean(X_input, axis=1)  # (samples, features)
+X_agg_original = feature_scaler.inverse_transform(X_agg)
 
 # -----------------------------
-# Create summary for LLM
+# Create summary for LLM (with original feature values)
 # -----------------------------
 feature_summary = {}
 for i, feature in enumerate(latest_scaled.columns):
     feature_summary[feature] = {
-        "value": float(X_agg[0, i]),         # average feature value over timesteps
-        "shap_importance": float(sv_sum[0, i])  # aggregated SHAP value
+        "value": float(X_agg_original[0, i]),       # original scale
+        "shap_importance": float(sv_sum[0, i])     # SHAP still based on scaled input
     }
 
+st.write("Feature Summary (for LLM, original feature values):")
+st.json(feature_summary)
+
+# -----------------------------
+# Convert JSON summary to prompt text
+# -----------------------------
+prompt_lines = ["Feature contributions for next-day Close prediction:\n"]
+for feature, values in feature_summary.items():
+    line = f"- {feature}: value = {values['value']:.2f}, SHAP importance = {values['shap_importance']:.4f}"
+    prompt_lines.append(line)
+
+prompt_text = "\n".join(prompt_lines)
+
+st.write("LLM Prompt Text:")
+st.text(prompt_text)
 # Display in Streamlit as table
 # st.write("Feature Summary (for LLM):")
 # st.json(feature_summary)
@@ -416,28 +432,16 @@ def generate(user_input):
 # Streamlit UI
 st.title("Google GenAI Explanation")
 
-
-
-
 # st.write("**What would you like to know about the prediction?**")
 # st.text_area("", user_input, height=150)
 
 if st.button("Generate"):
-      # Example mapping of prompts to pre-existing SHAP texts
-      # Get the corresponding SHAP text
-  # User selects a prompt
-    prompts = {
-    "Prompt 1": f"Explain how the following features contributed to prediction in simple language:\n{feature_summary}",
-    "Prompt 2": "SHAP text for prompt 2...",
-    "Prompt 3": "SHAP text for prompt 3...",
-    # Add more prompts and corresponding SHAP texts as needed
-    }
-    selected_prompt = st.selectbox("What would you like to know about the prediction?:", list(prompts.keys()))
-    user_input = prompts[selected_prompt]
-    if user_input.strip():
-      generate(user_input)
+    # Automatically use the SHAP summary prompt text
+    # Make sure 'prompt_text' is already defined from your previous SHAP computation
+    if prompt_text.strip():  # check if prompt_text is not empty
+        generate(prompt_text)
     else:
-        st.warning("No text available for the selected prompt.")
+        st.warning("SHAP summary is not available yet.")
 
 
 
