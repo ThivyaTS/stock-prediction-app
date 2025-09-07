@@ -101,7 +101,7 @@ warnings.filterwarnings("ignore")  # optional: ignore all other warnings
 st.set_page_config(
     page_title="Stock Dashboard",
     layout="wide",  # makes the page full-width
-    set_blurred_background("bg_thivya_web.jpg", blur_px=6)
+    set_blurred_background("bg_thivya_web.jpg", blur_px=6),
 )
 
 
