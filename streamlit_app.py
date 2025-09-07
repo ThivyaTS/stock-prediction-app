@@ -316,7 +316,7 @@ import joblib
 # Prepare background for Kernel SHAP
 # -----------------------------
 # Scale entire dataset
-data_numeric = data.drop(columns=non_numeric_cols)
+data_numeric = dataFrame.drop(columns=non_numeric_cols)
 df_scaled = pd.DataFrame(feature_scaler.transform(data_numeric), columns=data_numeric.columns)
 
 # Generate all sliding windows
