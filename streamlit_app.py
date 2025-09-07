@@ -45,34 +45,36 @@ def get_base64_bg(image_path):
         data = f.read()
     return base64.b64encode(data).decode()
 
-# Set background image (scrollable and 60% opacity)
+# Set background image
 def set_background(image_file):
     encoded_bg = get_base64_bg(image_file)
     background_css = f"""
     <style>
     .stApp {{
-        background: url("data:image/jpg;base64,{encoded_bg}") no-repeat center center;
+        background-image: url("data:image/jpg;base64,{encoded_bg}");
         background-size: cover;
-        background-attachment: scroll;
-        position: relative;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        opacity: 1;
     }}
 
     .stApp::before {{
         content: "";
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
         height: 100%;
-        background-color: rgba(255, 255, 255, 0.4); /* 0.4 = 60% image opacity */
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.8);  /* 0.8 = 20% transparent white layer */
         z-index: -1;
     }}
     </style>
     """
     st.markdown(background_css, unsafe_allow_html=True)
 
-# Call it at the top of your app
+# Call the function
 set_background("bg_thivya_web.jpg")
+
 
 
 
