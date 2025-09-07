@@ -438,7 +438,7 @@ if st.button("🔮 Predict Next Step"):
     instruction = f"""on{pred_date}Explain how each feature influenced today’s stock price prediction. Use the SHAP importance values to describe whether a feature pushed the predicted price higher or lower 
     compared to the average. Do not mention technical terms like SHAP and its VALUES or the model — instead, explain in plain language. Focus on the relative contribution of each feature, using everyday examples 
     (e.g., 'slightly increased', 'pushed down strongly'). Summarize the most important drivers, and highlight why today’s prediction looks the way it does. Avoid showing raw numbers — 
-    use percentages or qualitative terms instead.SUMMMARIZE ALL OF THEM IN JUST 50 words. Avoid using special characters like (*?!$)\n\n"""
+    use percentages or qualitative terms instead.SUMMMARIZE ALL OF THEM IN JUST 50 words. Avoid using special characters like (*?!$)"\n"\n"""
     
     prompt_lines = [instruction]  # start with instruction
     for feature, values in feature_summary.items():
@@ -498,7 +498,7 @@ if st.button("🔮 Predict Next Step"):
     
 # Streamlit UI
 st.title("Google GenAI Explanation")
-prompt_text.strip()
+# prompt_text.strip()
 generate(prompt_text)
 
 # st.write("**What would you like to know about the prediction?**")
