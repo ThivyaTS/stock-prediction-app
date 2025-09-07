@@ -39,22 +39,38 @@ import warnings
 
 import base64
 
-def set_scrollable_background(image_path):
+# Function to encode image to base64
+def get_base64_bg(image_path):
     with open(image_path, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode()
-    css = f"""
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+# Set background image
+def set_background(image_file):
+    encoded_bg = get_base64_bg(image_file)
+    background_css = f"""
     <style>
-    body {{
-        background-image: url("data:image/jpeg;base64,{encoded}");
-        background-repeat: no-repeat;
+    .stApp {{
+        background-image: url("data:image/jpg;base64,{encoded_bg}");
         background-size: cover;
-        background-attachment: scroll;
-        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        opacity: 1;
+    }}
+
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.8);  /* 0.8 = 20% transparent white layer */
+        z-index: -1;
     }}
     </style>
     """
-    st.markdown(css, unsafe_allow_html=True)
-
+    st.markdown(background_css, unsafe_allow_html=True)
 
 
 
@@ -76,7 +92,7 @@ st.set_page_config(
     page_title="Stock Dashboard",
     layout="wide",  # makes the page full-width
 )
-set_scrollable_background("bg_thivya_web.jpg")
+set_background("bg_thivya_web.jpg")
 
 st.title("Stock Price Visualization")
 
