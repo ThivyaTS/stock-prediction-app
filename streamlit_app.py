@@ -502,7 +502,7 @@ def generate(user_input):
 st.title("Google GenAI Streamlit Demo with SHAP Prompts")
 
 # User selects a prompt
-selected_prompt = st.selectbox("Select a prompt:", list(shap_texts.keys()))
+selected_prompt = st.selectbox("Select a prompt:", list(prompts.keys()))
 
 # Get the corresponding SHAP text
 user_input = prompts[selected_prompt]
