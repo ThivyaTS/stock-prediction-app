@@ -51,15 +51,17 @@ def set_blurred_background(image_path: str, blur_px: int = 6):
         position: relative;
         z-index: 0;
     }}
+
     .blur-bg-container {{
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         z-index: -1;
         overflow: hidden;
     }}
+
     .blur-bg-container::before {{
         content: "";
         position: absolute;
@@ -71,7 +73,7 @@ def set_blurred_background(image_path: str, blur_px: int = 6):
         background-size: cover;
         background-position: center;
         filter: blur({blur_px}px);
-        transform: scale(1.05);  /* Optional: fix edges from blur cut-off */
+        transform: scale(1.05);  /* prevents edges from cutting off */
     }}
     </style>
     <div class="blur-bg-container"></div>
@@ -99,10 +101,9 @@ warnings.filterwarnings("ignore")  # optional: ignore all other warnings
 st.set_page_config(
     page_title="Stock Dashboard",
     layout="wide"  # makes the page full-width
+    set_blurred_background("bg_thivya_web.jpg", blur_px=6)
 )
 
-# ✅ Call this early in the app
-set_blurred_background("bg_thivya_web.jpg", blur_px=6)
 
 st.title("Stock Price Visualization")
 
