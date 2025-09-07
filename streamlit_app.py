@@ -269,17 +269,18 @@ sv_sum = np.sum(sv_3d, axis=1)  # (samples, features)
 X_agg = np.mean(X_input, axis=1)  # (samples, features)
 
 # -----------------------------
-# Display in Streamlit
+# Create summary for LLM
 # -----------------------------
-st.write("SHAP Feature-level Importance for Latest Row:")
-fig, ax = plt.subplots(figsize=(8,5))
-shap.summary_plot(
-    sv_sum,
-    X_agg,
-    feature_names=latest_scaled.columns,
-    show=False
-)
-st.pyplot(fig)
+feature_summary = {}
+for i, feature in enumerate(latest_scaled.columns):
+    feature_summary[feature] = {
+        "value": float(X_agg[0, i]),         # average feature value over timesteps
+        "shap_importance": float(sv_sum[0, i])  # aggregated SHAP value
+    }
+
+# Display in Streamlit as table
+st.write("Feature Summary (for LLM):")
+st.json(feature_summary)
 
 # # -----------------------------
 # # LLM Explanation
