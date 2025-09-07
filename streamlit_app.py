@@ -54,23 +54,26 @@ def set_background(image_file):
         background-image: url("data:image/jpg;base64,{encoded_bg}");
         background-size: cover;
         background-repeat: no-repeat;
-        background-attachment: scroll;  /* changed fixed to scroll */
+        background-attachment: scroll;
         opacity: 1;
+        position: relative;  /* ensure positioning context */
+        z-index: 0;          /* place below content */
     }}
 
     .stApp::before {{
         content: "";
-        position: fixed;
+        position: absolute;   /* changed from fixed to absolute */
         top: 0;
         left: 0;
         height: 100%;
         width: 100%;
-        background-color: rgba(255, 255, 255, 0.8);  /* 0.8 = 20% transparent white layer */
+        background-color: rgba(255, 255, 255, 0.8); /* overlay with transparency */
         z-index: -1;
     }}
     </style>
     """
     st.markdown(background_css, unsafe_allow_html=True)
+
 
 
 
