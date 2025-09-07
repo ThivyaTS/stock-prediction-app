@@ -241,6 +241,8 @@ with col_chart:
         yaxis_title="Amount (raw scale)",
         template="plotly_white",
         height=500,
+        plot_bgcolor='rgba(0,0,0,0.7)',   # chart area: black, 70% opacity
+        paper_bgcolor='rgba(0,0,0,0.0)',  # outside area: black, 70% opacity
         margin=dict(l=20, r=20, t=50, b=40)
     )
 
