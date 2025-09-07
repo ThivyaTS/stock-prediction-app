@@ -372,7 +372,7 @@ def save_binary_file(file_name, data):
 
 def generate(user_input):
     client = genai.Client(
-        api_key="AIzaSyAxfhlsbPeJ4ipjp72-0SnJ1G879WqfTs4",
+        api_key=os.getenv("GEMINI_API_KEY"),
     )
 
     model = "gemini-2.5-flash"
