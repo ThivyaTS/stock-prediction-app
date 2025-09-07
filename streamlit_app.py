@@ -444,7 +444,7 @@ if st.button("🔮 Predict Next Step"):
     for feature, values in feature_summary.items():
         line = f"- {feature}: value = {values['value']:.2f}, SHAP importance = {values['shap_importance']:.4f}"
         prompt_lines.append(line)
-    
+
     prompt_text = "\n".join(prompt_lines)
     
     def save_binary_file(file_name, data):
