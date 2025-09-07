@@ -434,6 +434,74 @@ explainer = shap.KernelExplainer(model_predict, background)
 #     except Exception as e:
 #         st.error(f"Error generating content: {e}")
 
+import base64
+import mimetypes
+import os
+import streamlit as st
+from google import genai
+from google.genai import types
+
+def save_binary_file(file_name, data):
+    f = open(file_name, "wb")
+    f.write(data)
+    f.close()
+    st.success(f"File saved to: {file_name}")
+
+def generate(user_input):
+    client = genai.Client(
+        api_key=os.getenv("GEMINI_API_KEY"),
+    )
+
+    model = "gemini-2.5-flash"
+    contents = [
+        types.Content(
+            role="user",
+            parts=[
+                types.Part.from_text(text=user_input),
+            ],
+        ),
+    ]
+    generate_content_config = types.GenerateContentConfig(
+        temperature=0.05,
+        response_modalities=[
+            "TEXT",
+        ],
+    )
+
+    file_index = 0
+    for chunk in client.models.generate_content_stream(
+        model=model,
+        contents=contents,
+        config=generate_content_config,
+    ):
+        if (
+            chunk.candidates is None
+            or chunk.candidates[0].content is None
+            or chunk.candidates[0].content.parts is None
+        ):
+            continue
+        if chunk.candidates[0].content.parts[0].inline_data and chunk.candidates[0].content.parts[0].inline_data.data:
+            file_name = f"ENTER_FILE_NAME_{file_index}"
+            file_index += 1
+            inline_data = chunk.candidates[0].content.parts[0].inline_data
+            data_buffer = inline_data.data
+            file_extension = mimetypes.guess_extension(inline_data.mime_type)
+            save_binary_file(f"{file_name}{file_extension}", data_buffer)
+        else:
+            st.text(chunk.text)
+
+# Streamlit UI
+st.title("Google GenAI Streamlit Demo")
+
+user_input = st.text_area("Enter your text:", "How are you?")
+
+if st.button("Generate"):
+    if user_input.strip():
+        generate(user_input)
+    else:
+        st.warning("Please enter some text to generate a response.")
+
+
 
 
 
