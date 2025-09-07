@@ -351,20 +351,20 @@ def model_predict(input_2d):
     return pred
 
 explainer = shap.KernelExplainer(model_predict, background)
-# shap_values = explainer.shap_values(X_input_flat)
+shap_values = explainer.shap_values(X_input_flat)
 
-# # Aggregate SHAP values per feature
-# shap_values_array = shap_values[0].reshape(window, num_features)
-# feature_importance = np.abs(shap_values_array).sum(axis=0)
-# feature_names = latest_scaled.columns
-# shap_summary = dict(zip(feature_names, feature_importance))
-# shap_summary_sorted = dict(sorted(shap_summary.items(), key=lambda x: x[1], reverse=True))
+# Aggregate SHAP values per feature
+shap_values_array = shap_values[0].reshape(window, num_features)
+feature_importance = np.abs(shap_values_array).sum(axis=0)
+feature_names = latest_scaled.columns
+shap_summary = dict(zip(feature_names, feature_importance))
+shap_summary_sorted = dict(sorted(shap_summary.items(), key=lambda x: x[1], reverse=True))
 
 # -----------------------------
 # LLM Explanation
 # -----------------------------
 
-# shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
+shap_text = "\n".join([f"{k}: {v:.4f}" for k, v in shap_summary_sorted.items()])
 # prompt_text = f"Explain how the following features contributed to {topic} prediction:\n{shap_text}"
 # API_KEY = os.getenv("GEMINI_API_KEY")
 # if not API_KEY:
@@ -441,6 +441,14 @@ import streamlit as st
 from google import genai
 from google.genai import types
 
+# Example mapping of prompts to pre-existing SHAP texts
+prompts = {
+    "Prompt 1": f"Explain how the following features contributed to prediction:\n{shap_text}",
+    "Prompt 2": "SHAP text for prompt 2...",
+    "Prompt 3": "SHAP text for prompt 3...",
+    # Add more prompts and corresponding SHAP texts as needed
+}
+
 def save_binary_file(file_name, data):
     f = open(file_name, "wb")
     f.write(data)
@@ -449,7 +457,7 @@ def save_binary_file(file_name, data):
 
 def generate(user_input):
     client = genai.Client(
-        api_key=os.getenv("GEMINI_API_KEY"),
+        api_key="AIzaSyAxfhlsbPeJ4ipjp72-0SnJ1G879WqfTs4",
     )
 
     model = "gemini-2.5-flash"
@@ -491,15 +499,22 @@ def generate(user_input):
             st.text(chunk.text)
 
 # Streamlit UI
-st.title("Google GenAI Streamlit Demo")
+st.title("Google GenAI Streamlit Demo with SHAP Prompts")
 
-user_input = st.text_area("Enter your text:", "How are you?")
+# User selects a prompt
+selected_prompt = st.selectbox("Select a prompt:", list(shap_texts.keys()))
+
+# Get the corresponding SHAP text
+user_input = prompts[selected_prompt]
+
+st.write("**What would you like to know about the prediction?**")
+st.text_area("", user_input, height=150)
 
 if st.button("Generate"):
     if user_input.strip():
         generate(user_input)
     else:
-        st.warning("Please enter some text to generate a response.")
+        st.warning("No text available for the selected prompt.")
 
 
 
