@@ -116,7 +116,7 @@ col1, col2 = st.columns([4, 2])  # left column bigger
 # Left Column: Open & Close Prices
 # -------------------------
 with col1:
-    st.subheader("AAPL Close Prices")
+    st.subheader("Apple Inc. (AAPL) Stock Close Price Trend")
 
     fig1 = go.Figure()
     fig1.add_trace(go.Scatter(
