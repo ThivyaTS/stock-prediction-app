@@ -500,9 +500,12 @@ if st.button("🔮 Predict Next Step"):
 with st.container():
     st.title("🧠 Google GenAI Explanation")
 
-    # Show the prompt text in an expandable code box
+    # Show the prompt text in an expandable code box, safely
     with st.expander("📋 View Prompt Text Being Sent to Google GenAI", expanded=False):
-        st.code(prompt_text.strip(), language='markdown')
+        if prompt_text and isinstance(prompt_text, str):
+            st.code(prompt_text.strip(), language='markdown')
+        else:
+            st.info("Prompt text is not available yet.")
 
     st.markdown("Click the button below to generate a plain-language explanation of today's stock price prediction.")
 
@@ -512,6 +515,7 @@ with st.container():
             generate(prompt_text)
 
         st.success("Explanation generated successfully!")
+
 
     
     
