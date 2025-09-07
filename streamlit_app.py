@@ -223,48 +223,28 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}**")
 
-# -----------------------------
-# SHAP Feature Importance
-# -----------------------------
-# Flatten input for KernelExplainer
-X_flat = X_input.reshape(X_input.shape[0], -1)
-background = X_flat  # using latest window as background
+timesteps = X_input.shape[1]
+features = X_input.shape[2]
 
-# Kernel explainer with lambda to reshape back to LSTM input
-explainer = shap.KernelExplainer(
-    lambda x: model.predict(x.reshape(x.shape[0], window, latest_scaled.shape[1])),
-    background
-)
+# Wrapper to let SHAP work with LSTM
+def model_predict_wrapper(X_flat):
+    # Reshape flattened input back to 3D
+    X_3d = X_flat.reshape(X_flat.shape[0], timesteps, features)
+    return model.predict(X_3d)
+
+# Use a small background set (SHAP is expensive)
+idx = np.random.choice(X_input.shape[0], size=20, replace=False)
+background = X_input[idx]  # (20, timesteps, features)
+background_flat = background.reshape(background.shape[0], -1)  # flatten for SHAP
+
+# Initialize SHAP KernelExplainer
+explainer = shap.KernelExplainer(model_predict_wrapper, background_flat)
+
+# Use the same input (latest_data) for explanation
+X_sample_flat = X_input.reshape(X_input.shape[0], -1)
 
 # Compute SHAP values
-shap_values = explainer.shap_values(X_flat)
-
-# Aggregate SHAP values over timesteps
-timesteps = window
-features = latest_scaled.shape[1]
-samples = X_input.shape[0]
-
-shap_values_sum = []
-for i in range(1):  # single output
-    # reshape flattened SHAP back to (samples, timesteps, features)
-    sv_3d = shap_values[0].reshape(samples, timesteps, features)
-    # sum over timesteps → (samples, features)
-    sv_sum = np.sum(sv_3d, axis=1)
-    shap_values_sum.append(sv_sum)
-
-    # Aggregate input features over timesteps to match shape
-    X_agg = np.mean(X_input, axis=1)  # shape: (samples, features)
-
-    # Plot SHAP summary
-    st.write(f"SHAP Feature-level Importance for Output {i+1}")
-    shap.summary_plot(
-        sv_sum,
-        X_agg,
-        feature_names=latest_scaled.columns,
-        show=False
-    )
-    # Display plot in Streamlit
-    st.pyplot(bbox_inches='tight', dpi=150)
+shap_values = explainer.shap_values(X_sample_flat)
 # # -----------------------------
 # # LLM Explanation
 # # -----------------------------
