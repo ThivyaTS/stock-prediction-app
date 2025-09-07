@@ -441,13 +441,6 @@ import streamlit as st
 from google import genai
 from google.genai import types
 
-# Example mapping of prompts to pre-existing SHAP texts
-prompts = {
-    "Prompt 1": f"Explain how the following features contributed to prediction:\n{shap_text}",
-    "Prompt 2": "SHAP text for prompt 2...",
-    "Prompt 3": "SHAP text for prompt 3...",
-    # Add more prompts and corresponding SHAP texts as needed
-}
 
 def save_binary_file(file_name, data):
     f = open(file_name, "wb")
@@ -499,20 +492,27 @@ def generate(user_input):
             st.text(chunk.text)
 
 # Streamlit UI
-st.title("Google GenAI Streamlit Demo with SHAP Prompts")
+st.title("Google GenAI Explanation")
 
 # User selects a prompt
-selected_prompt = st.selectbox("Select a prompt:", list(prompts.keys()))
+selected_prompt = st.selectbox("What would you like to know about the prediction?:", list(prompts.keys()))
 
-# Get the corresponding SHAP text
-user_input = prompts[selected_prompt]
 
-st.write("**What would you like to know about the prediction?**")
-st.text_area("", user_input, height=150)
+# st.write("**What would you like to know about the prediction?**")
+# st.text_area("", user_input, height=150)
 
 if st.button("Generate"):
+      # Example mapping of prompts to pre-existing SHAP texts
+      # Get the corresponding SHAP text
+    user_input = prompts[selected_prompt]
+    prompts = {
+    "Prompt 1": f"Explain how the following features contributed to prediction:\n{shap_text}",
+    "Prompt 2": "SHAP text for prompt 2...",
+    "Prompt 3": "SHAP text for prompt 3...",
+    # Add more prompts and corresponding SHAP texts as needed
+    }
     if user_input.strip():
-        generate(user_input)
+    generate(user_input)
     else:
         st.warning("No text available for the selected prompt.")
 
