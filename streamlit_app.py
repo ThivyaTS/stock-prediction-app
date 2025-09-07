@@ -135,18 +135,21 @@ st.markdown("---")  # optional horizontal divider
 
 st.subheader("📊 Annual Financial Metrics")
 
-# Load financial data
+# --- Load financial data ---
 @st.cache_data
 def load_financial_data():
-    return pd.read_csv("aapl_fin.csv")
+    df = pd.read_csv("aapl_fin.csv")
+    df = df.dropna(how='all')  # Drop rows where all columns are NaN
+    df.columns = df.columns.str.strip()  # Strip column names
+    df['year'] = pd.to_datetime(df['year'], errors='coerce').dt.year  # Parse date and extract year
+    df = df.dropna(subset=['year'])  # Drop rows where year couldn't be parsed
+    df['year'] = df['year'].astype(int).astype(str)  # Convert year to string for x-axis
+    df = df.sort_values('year')  # Sort by year
+    return df
 
 fin_data = load_financial_data()
 
-# Preprocess
-fin_data.columns = fin_data.columns.str.strip()
-fin_data['year'] = pd.to_datetime(fin_data['year']).dt.year.astype(str)
-
-# Shorten column names
+# Map shorter names
 metric_map = {
     "EPS": "EPS",
     "Net income": "Net Income",
@@ -156,14 +159,16 @@ metric_map = {
     "Operating expense": "OpEx"
 }
 
+# --- Plot ---
 fig3 = go.Figure()
 
 for metric in metric_map:
-    fig3.add_trace(go.Bar(
-        x=fin_data['year'],
-        y=fin_data[metric],
-        name=metric_map[metric]
-    ))
+    if metric in fin_data.columns:
+        fig3.add_trace(go.Bar(
+            x=fin_data['year'],
+            y=fin_data[metric],
+            name=metric_map[metric]
+        ))
 
 fig3.update_layout(
     title="Apple Financial Overview by Year",
@@ -174,7 +179,8 @@ fig3.update_layout(
     height=500
 )
 
-# Plot full-width
+# --- Display full-width chart ---
+st.subheader("📊 Annual Financial Metrics")
 st.plotly_chart(fig3, use_container_width=True)
 
 # -----------------------------
