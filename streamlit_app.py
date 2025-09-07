@@ -512,7 +512,7 @@ if st.button("Generate"):
     # Add more prompts and corresponding SHAP texts as needed
     }
     if user_input.strip():
-    generate(user_input)
+      generate(user_input)
     else:
         st.warning("No text available for the selected prompt.")
 
