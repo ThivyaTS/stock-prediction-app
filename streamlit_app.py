@@ -511,7 +511,7 @@ if st.button("🔮 Predict Next Step"):
             st.markdown(
                 f"""
                 <div style="background-color:#f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
-                    <p style="font-size: 16px; line-height: 1.6; color: #333;">{final_explanation}</p>
+                    <p style="font-size: 16px; line-height: 1.6; color: #black;">{final_explanation}</p>
                 </div>
                 """,
                 unsafe_allow_html=True
