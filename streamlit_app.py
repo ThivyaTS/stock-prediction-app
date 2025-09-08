@@ -438,7 +438,7 @@ if st.button("🔮 Predict Next Day Close Price"):
         ], ignore_index=True)
 
     fig.update_layout(
-        title='Step-by-Step Predictions',
+        title='Latest Close Price with Predictions',
         xaxis_title='Date',
         yaxis_title='Close Price',
         plot_bgcolor='rgba(0,0,0,0.7)',   # chart area: black, 70% opacity
