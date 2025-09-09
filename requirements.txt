@@ -16,5 +16,6 @@ google-genai>=0.11.0
 streamlit
 requests
 scikit-learn
-
+gcsfs
+st-files-connection
 
