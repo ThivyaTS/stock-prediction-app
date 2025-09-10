@@ -449,32 +449,31 @@ if st.button("🔮 Predict Next Day Close Price"):
     # Plot updated figure
     # -----------------------------
     fig = go.Figure()
-
-    # Ensure both actual and predicted share the same timeline
-    combined_df = pd.DataFrame(index=st.session_state.predictions.index.union(dataFrame.index))
-    combined_df["Actual_Close"] = dataFrame["Close"].reindex(combined_df.index)
-    if "Predicted_Close" in st.session_state.predictions.columns:
-        combined_df["Predicted_Close"] = st.session_state.predictions["Predicted_Close"]
-
-    # Plot Actual Close (blue line)
+    
+    # 1. Actual close values from original dataframe
     fig.add_trace(go.Scatter(
-        x=combined_df.index,
-        y=combined_df["Actual_Close"],
+        x=dataFrame.index,
+        y=dataFrame["Close"],
         mode="lines+markers",
         name="Actual Close",
         line=dict(color="royalblue", width=2)
     ))
-
-    # Plot Predicted Close (yellow dotted line)
-    if "Predicted_Close" in combined_df.columns:
-        fig.add_trace(go.Scatter(
-            x=combined_df.index,
-            y=combined_df["Predicted_Close"],
-            mode="lines+markers",
-            name="Predicted Close",
-            line=dict(color="yellow", width=2, dash="dot")
-        ))
     
+    # 2. Predicted close values from session state
+    if "Predicted_Close" in st.session_state.predictions.columns:
+        pred_series = st.session_state.predictions["Predicted_Close"].dropna()
+    
+        # Only plot if there is something in predictions
+        if not pred_series.empty:
+            fig.add_trace(go.Scatter(
+                x=pred_series.index,
+                y=pred_series.values,
+                mode="lines+markers",
+                name="Predicted Close",
+                line=dict(color="yellow", width=2, dash="dot")
+            ))
+    
+    # 3. Layout settings
     fig.update_layout(
         title="Latest Close Price with Predictions",
         xaxis_title="Date",
@@ -485,6 +484,7 @@ if st.button("🔮 Predict Next Day Close Price"):
     )
     
     st.plotly_chart(fig, use_container_width=True)
+
 
 
     # -----------------------------
