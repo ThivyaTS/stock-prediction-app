@@ -447,29 +447,35 @@ if st.button("🔮 Predict Next Day Close Price"):
         )
 
     # -----------------------------
-    # Plot updated figure
+    # Combine Actual and Predicted into one DataFrame
+    # -----------------------------
+    combined_df = pd.DataFrame({
+        "Actual_Close": dataFrame["Close"],
+        "Predicted_Close": st.session_state.predictions["Predicted_Close"]
+    }).sort_index()
+    
+    # -----------------------------
+    # Plot figure
     # -----------------------------
     fig = go.Figure()
     
-    # Actual close values (blue line)
-    if "Close" in st.session_state.predictions.columns:
-        fig.add_trace(go.Scatter(
-            x=st.session_state.predictions.index,
-            y=st.session_state.predictions["Close"],
-            mode="lines+markers",
-            name="Actual Close",
-            line=dict(color="royalblue", width=2)
-        ))
+    # Actual close (blue line)
+    fig.add_trace(go.Scatter(
+        x=combined_df.index,
+        y=combined_df["Actual_Close"],
+        mode="lines+markers",
+        name="Actual Close",
+        line=dict(color="royalblue", width=2)
+    ))
     
-    # Predicted close values (yellow dotted line)
-    if "Predicted_Close" in st.session_state.predictions.columns:
-        fig.add_trace(go.Scatter(
-            x=st.session_state.predictions.index,
-            y=st.session_state.predictions["Predicted_Close"],
-            mode="lines+markers",
-            name="Predicted Close",
-            line=dict(color="yellow", width=2, dash="dot")
-        ))
+    # Predicted close (yellow dotted line)
+    fig.add_trace(go.Scatter(
+        x=combined_df.index,
+        y=combined_df["Predicted_Close"],
+        mode="lines+markers",
+        name="Predicted Close",
+        line=dict(color="yellow", width=2, dash="dot")
+    ))
     
     fig.update_layout(
         title="Latest Close Price with Predictions",
