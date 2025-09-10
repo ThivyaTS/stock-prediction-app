@@ -419,31 +419,23 @@ if st.button("🔮 Predict Next Day Close Price"):
     y_pred = target_scaler.inverse_transform(y_pred_scaled)
     predicted_close = y_pred[0][0]
 
-    # ===============================
-    # Add Prediction to Session State
-    # ===============================
-    last_date = st.session_state.predictions.index[-1]
-    pred_date = last_date + timedelta(days=1)
+    # ==============================
+    # 🔹 Step 1: Load last_5_rows.csv (actuals)
+    # ==============================
+    last_5 = pd.read_csv("last_5_rows.csv", parse_dates=["Date"])
+    last_5.set_index("Date", inplace=True)
     
-    # Get previous close value
-    previous_close = st.session_state.predictions.loc[last_date, "Close"]
+    # ==============================
+    # 🔹 Step 2: When generating prediction, align with actual
+    # ==============================
+    last_date = last_5.index[-1]
+    pred_date = last_date  # we align prediction with this same date
     
-    # Add predicted close value
-    st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
-
-    # Get last actual date in CSV
-    last_actual_date = dataFrame.index[-1]
+    actual_close = last_5.loc[pred_date, "Close"]
     
-    # If prediction date is still inside CSV range, take actual too
-    if pred_date in dataFrame.index:
-        actual_close = dataFrame.loc[pred_date, "Close"]
-    else:
-        actual_close = None  # no actual available yet
-    
-    # Store both actual + predicted
     new_row = pd.DataFrame([{
         "Date": pred_date.strftime("%Y-%m-%d"),
-        "Actual Close": round(actual_close, 2) if actual_close is not None else None,
+        "Actual Close": round(actual_close, 2),
         "Predicted Close": round(predicted_close, 2)
     }])
     
@@ -452,32 +444,12 @@ if st.button("🔮 Predict Next Day Close Price"):
         ignore_index=True
     )
     
-    # Show success message
-    st.success(
-        f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**"
-    )
-    
-    # ==================================
-    # Store Predicted Row (Avoid Duplicates)
-    # ==================================
-    if pred_date.strftime("%Y-%m-%d") not in st.session_state.predicted_rows["Date"].values:
-        new_row = pd.DataFrame([{
-            "Date": pred_date.strftime("%Y-%m-%d"),
-            "Previous Close": round(previous_close, 2),
-            "Predicted Close": round(predicted_close, 2)
-        }])
-        
-        st.session_state.predicted_rows = pd.concat(
-            [st.session_state.predicted_rows, new_row],
-            ignore_index=True
-        )
-    
-    # ===============================
-    # Plot Updated Figure
-    # ===============================
+    # ==============================
+    # 🔹 Step 3: Plot Actual vs Predicted Close
+    # ==============================
     fig = go.Figure()
     
-    # 1. Plot actual closes for all available dates (CSV)
+    # Full actual closes (CSV history)
     fig.add_trace(go.Scatter(
         x=dataFrame.index,
         y=dataFrame['Close'],
@@ -486,35 +458,25 @@ if st.button("🔮 Predict Next Day Close Price"):
         line=dict(color='blue')
     ))
     
-    # 2. Plot predicted closes (aligned with actuals where available)
+    # Predicted Close (from model)
     if not st.session_state.predicted_rows.empty:
-        pred_dates = pd.to_datetime(st.session_state.predicted_rows["Date"])
-        pred_values = st.session_state.predicted_rows["Predicted Close"]
-    
         fig.add_trace(go.Scatter(
-            x=pred_dates,
-            y=pred_values,
+            x=pd.to_datetime(st.session_state.predicted_rows["Date"]),
+            y=st.session_state.predicted_rows["Predicted Close"],
             mode='lines+markers',
             name='Predicted Close',
             line=dict(color='red', dash='dot'),
             marker=dict(size=8)
         ))
     
-        # 3. If actuals exist for those same prediction dates → plot them too
-        matching_actuals = []
-        for d in pred_dates:
-            if d in dataFrame.index:
-                matching_actuals.append(dataFrame.loc[d, "Close"])
-            else:
-                matching_actuals.append(None)
-    
+        # Actual Close on prediction days (from last_5_rows.csv)
         fig.add_trace(go.Scatter(
-            x=pred_dates,
-            y=matching_actuals,
+            x=pd.to_datetime(st.session_state.predicted_rows["Date"]),
+            y=st.session_state.predicted_rows["Actual Close"],
             mode='lines+markers',
             name='Actual Close (Prediction Days)',
             line=dict(color='blue'),
-            marker=dict(size=8, symbol='x')
+            marker=dict(size=10, symbol='x')
         ))
     
     fig.update_layout(
@@ -527,6 +489,7 @@ if st.button("🔮 Predict Next Day Close Price"):
     )
     
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
