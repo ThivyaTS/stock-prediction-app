@@ -155,7 +155,7 @@ with col1:
         ),
         template='plotly_white',
         height=500,
-        plot_bgcolor='rgba(2, 54, 61,0.7)',   # chart area: black, 70% opacity
+        plot_bgcolor='rgba(29, 37, 38,0.7)',   # chart area: black, 70% opacity
         paper_bgcolor='rgba(0,0,0,0.0)'   # outside area: black, 70% opacity
 
     )
