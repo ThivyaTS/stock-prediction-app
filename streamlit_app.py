@@ -419,41 +419,63 @@ if st.button("🔮 Predict Next Day Close Price"):
     y_pred = target_scaler.inverse_transform(y_pred_scaled)
     predicted_close = y_pred[0][0]
 
-    # Add prediction to session_state dataframe
+       # Add prediction to session_state dataframe
     last_date = st.session_state.predictions.index[-1]
     pred_date = last_date + timedelta(days=1)
-    # Get previous close value
-    previous_close = st.session_state.predictions.loc[last_date, "Close"]
-    st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
 
-    st.success(f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**")
-    # Plot updated figure
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=st.session_state.predictions.index[-(window+10):], 
-        y=st.session_state.predictions['Close'].iloc[-(window+10):], 
-        mode='lines+markers', 
-        name='Close (Actual + Predicted)'
-    ))
-    #new
-    # Store predicted row
-    # Avoid duplicate predictions (if somehow re-run)
+    # Get actual close if available
+    actual_close = None
+    if pred_date in dataFrame.index:
+        actual_close = dataFrame.loc[pred_date, "Close"]
+
+    # Store prediction in main dataframe
+    st.session_state.predictions.loc[pred_date, "Predicted_Close"] = predicted_close
+
+    # Store row in prediction summary table
+    row_entry = {
+        "Date": pred_date.strftime("%Y-%m-%d"),
+        "Previous Close": round(st.session_state.predictions.loc[last_date, "Close"], 2),
+        "Predicted Close": round(predicted_close, 2),
+        "Actual Close": round(actual_close, 2) if actual_close is not None else "N/A"
+    }
+
     if pred_date.strftime("%Y-%m-%d") not in st.session_state.predicted_rows["Date"].values:
-        st.session_state.predicted_rows = pd.concat([
-            st.session_state.predicted_rows,
-            pd.DataFrame([{
-                "Date": pred_date.strftime("%Y-%m-%d"),
-                "Previous Close": round(previous_close, 2),
-                "Predicted Close": round(predicted_close, 2)
-            }])
-        ], ignore_index=True)
+        st.session_state.predicted_rows = pd.concat(
+            [st.session_state.predicted_rows, pd.DataFrame([row_entry])],
+            ignore_index=True
+        )
+
+    # -----------------------------
+    # Plot updated figure
+    # -----------------------------
+    fig = go.Figure()
+
+    # Actual close values
+    fig.add_trace(go.Scatter(
+        x=dataFrame.index[-(window+10):], 
+        y=dataFrame['Close'].iloc[-(window+10):], 
+        mode='lines+markers', 
+        name='Actual Close',
+        line=dict(color='royalblue', width=2)
+    ))
+
+    # Predicted close values (yellow)
+    if "Predicted_Close" in st.session_state.predictions.columns:
+        pred_series = st.session_state.predictions["Predicted_Close"].dropna()
+        fig.add_trace(go.Scatter(
+            x=pred_series.index,
+            y=pred_series.values,
+            mode='lines+markers',
+            name='Predicted Close',
+            line=dict(color='yellow', width=2, dash="dot")
+        ))
 
     fig.update_layout(
         title='Latest Close Price with Predictions',
         xaxis_title='Date',
         yaxis_title='Close Price',
-        plot_bgcolor='rgba(0,0,0,0.7)',   # chart area: black, 70% opacity
-        paper_bgcolor='rgba(0,0,0,0.0)',  # outside area: black, 70% opacity
+        plot_bgcolor='rgba(0,0,0,0.7)',
+        paper_bgcolor='rgba(0,0,0,0.0)',
         template='plotly_white'
     )
     
