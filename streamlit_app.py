@@ -419,17 +419,18 @@ if st.button("🔮 Predict Next Day Close Price"):
     y_pred = target_scaler.inverse_transform(y_pred_scaled)
     predicted_close = y_pred[0][0]
 
-       # Add prediction to session_state dataframe
+    # Add prediction to session_state dataframe
     last_date = st.session_state.predictions.index[-1]
     pred_date = last_date + timedelta(days=1)
-
+    
     # Get actual close if available
     actual_close = None
     if pred_date in dataFrame.index:
         actual_close = dataFrame.loc[pred_date, "Close"]
-
-    # Store prediction in main dataframe
+    
+    # Store both actual and predicted in main dataframe
     st.session_state.predictions.loc[pred_date, "Predicted_Close"] = predicted_close
+    st.session_state.predictions.loc[pred_date, "Close"] = actual_close  # keep actual if exists
 
     # Store row in prediction summary table
     row_entry = {
@@ -450,30 +451,26 @@ if st.button("🔮 Predict Next Day Close Price"):
     # -----------------------------
     fig = go.Figure()
     
-    # 1. Actual close values from original dataframe
-    fig.add_trace(go.Scatter(
-        x=dataFrame.index,
-        y=dataFrame["Close"],
-        mode="lines+markers",
-        name="Actual Close",
-        line=dict(color="royalblue", width=2)
-    ))
+    # Actual close values (blue line)
+    if "Close" in st.session_state.predictions.columns:
+        fig.add_trace(go.Scatter(
+            x=st.session_state.predictions.index,
+            y=st.session_state.predictions["Close"],
+            mode="lines+markers",
+            name="Actual Close",
+            line=dict(color="royalblue", width=2)
+        ))
     
-    # 2. Predicted close values from session state
+    # Predicted close values (yellow dotted line)
     if "Predicted_Close" in st.session_state.predictions.columns:
-        pred_series = st.session_state.predictions["Predicted_Close"].dropna()
+        fig.add_trace(go.Scatter(
+            x=st.session_state.predictions.index,
+            y=st.session_state.predictions["Predicted_Close"],
+            mode="lines+markers",
+            name="Predicted Close",
+            line=dict(color="yellow", width=2, dash="dot")
+        ))
     
-        # Only plot if there is something in predictions
-        if not pred_series.empty:
-            fig.add_trace(go.Scatter(
-                x=pred_series.index,
-                y=pred_series.values,
-                mode="lines+markers",
-                name="Predicted Close",
-                line=dict(color="yellow", width=2, dash="dot")
-            ))
-    
-    # 3. Layout settings
     fig.update_layout(
         title="Latest Close Price with Predictions",
         xaxis_title="Date",
