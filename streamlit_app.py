@@ -450,36 +450,42 @@ if st.button("🔮 Predict Next Day Close Price"):
     # -----------------------------
     fig = go.Figure()
 
-    # Plot ALL actual closes (up to latest available in dataFrame)
+    # Ensure both actual and predicted share the same timeline
+    combined_df = pd.DataFrame(index=st.session_state.predictions.index.union(dataFrame.index))
+    combined_df["Actual_Close"] = dataFrame["Close"].reindex(combined_df.index)
+    if "Predicted_Close" in st.session_state.predictions.columns:
+        combined_df["Predicted_Close"] = st.session_state.predictions["Predicted_Close"]
+
+    # Plot Actual Close (blue line)
     fig.add_trace(go.Scatter(
-        x=dataFrame.index,
-        y=dataFrame['Close'],
-        mode='lines+markers',
-        name='Actual Close',
-        line=dict(color='royalblue', width=2)
+        x=combined_df.index,
+        y=combined_df["Actual_Close"],
+        mode="lines+markers",
+        name="Actual Close",
+        line=dict(color="royalblue", width=2)
     ))
 
-    # Plot predicted closes (yellow, dotted)
-    if "Predicted_Close" in st.session_state.predictions.columns:
-        pred_series = st.session_state.predictions["Predicted_Close"].dropna()
+    # Plot Predicted Close (yellow dotted line)
+    if "Predicted_Close" in combined_df.columns:
         fig.add_trace(go.Scatter(
-            x=pred_series.index,
-            y=pred_series.values,
-            mode='lines+markers',
-            name='Predicted Close',
-            line=dict(color='yellow', width=2, dash="dot")
+            x=combined_df.index,
+            y=combined_df["Predicted_Close"],
+            mode="lines+markers",
+            name="Predicted Close",
+            line=dict(color="yellow", width=2, dash="dot")
         ))
-
+    
     fig.update_layout(
-        title='Latest Close Price with Predictions',
-        xaxis_title='Date',
-        yaxis_title='Close Price',
-        plot_bgcolor='rgba(0,0,0,0.7)',
-        paper_bgcolor='rgba(0,0,0,0.0)',
-        template='plotly_white'
+        title="Latest Close Price with Predictions",
+        xaxis_title="Date",
+        yaxis_title="Close Price",
+        plot_bgcolor="rgba(0,0,0,0.7)",
+        paper_bgcolor="rgba(0,0,0,0.0)",
+        template="plotly_white"
     )
-
+    
     st.plotly_chart(fig, use_container_width=True)
+
 
     # -----------------------------
     # Show table of predicted rows
