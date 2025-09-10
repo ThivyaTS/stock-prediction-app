@@ -608,7 +608,7 @@ if st.button("🔮 Predict Next Day Close Price"):
         with st.container():
             st.markdown(
                 f"""
-                <div style="background-color:#f0f0f0; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
+                <div style="background-color:#90EE90; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
                     <p style="font-size: 16px; line-height: 1.6; color: #black;">{final_explanation}</p>
                 </div>
                 """,
