@@ -419,73 +419,62 @@ if st.button("🔮 Predict Next Day Close Price"):
     y_pred = target_scaler.inverse_transform(y_pred_scaled)
     predicted_close = y_pred[0][0]
 
-    # Add prediction to session_state dataframe
+    # ===============================
+    # Add Prediction to Session State
+    # ===============================
     last_date = st.session_state.predictions.index[-1]
     pred_date = last_date + timedelta(days=1)
     
-    # Get actual close if available
-    actual_close = None
-    if pred_date in dataFrame.index:
-        actual_close = dataFrame.loc[pred_date, "Close"]
+    # Get previous close value
+    previous_close = st.session_state.predictions.loc[last_date, "Close"]
     
-    # Store both actual and predicted in main dataframe
-    st.session_state.predictions.loc[pred_date, "Predicted_Close"] = predicted_close
-    st.session_state.predictions.loc[pred_date, "Close"] = actual_close  # keep actual if exists
-
-    # Store row in prediction summary table
-    row_entry = {
-        "Date": pred_date.strftime("%Y-%m-%d"),
-        "Previous Close": round(st.session_state.predictions.loc[last_date, "Close"], 2),
-        "Predicted Close": round(predicted_close, 2),
-        "Actual Close": round(actual_close, 2) if actual_close is not None else "N/A"
-    }
-
-    if pred_date.strftime("%Y-%m-%d") not in st.session_state.predicted_rows["Date"].values:
-        st.session_state.predicted_rows = pd.concat(
-            [st.session_state.predicted_rows, pd.DataFrame([row_entry])],
-            ignore_index=True
-        )
-
-    # -----------------------------
-    # Combine Actual and Predicted into one DataFrame
-    # -----------------------------
-    combined_df = pd.DataFrame({
-        "Actual_Close": dataFrame["Close"],
-        "Predicted_Close": st.session_state.predictions["Predicted_Close"]
-    }).sort_index()
+    # Add predicted close value
+    st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
     
-    # -----------------------------
-    # Plot figure
-    # -----------------------------
-    fig = go.Figure()
-    
-    # Actual close (blue line)
-    fig.add_trace(go.Scatter(
-        x=combined_df.index,
-        y=combined_df["Actual_Close"],
-        mode="lines+markers",
-        name="Actual Close",
-        line=dict(color="royalblue", width=2)
-    ))
-    
-    # Predicted close (yellow dotted line)
-    fig.add_trace(go.Scatter(
-        x=combined_df.index,
-        y=combined_df["Predicted_Close"],
-        mode="lines+markers",
-        name="Predicted Close",
-        line=dict(color="yellow", width=2, dash="dot")
-    ))
-    
-    fig.update_layout(
-        title="Latest Close Price with Predictions",
-        xaxis_title="Date",
-        yaxis_title="Close Price",
-        plot_bgcolor="rgba(0,0,0,0.7)",
-        paper_bgcolor="rgba(0,0,0,0.0)",
-        template="plotly_white"
+    # Show success message
+    st.success(
+        f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**"
     )
     
+    # ==================================
+    # Store Predicted Row (Avoid Duplicates)
+    # ==================================
+    if pred_date.strftime("%Y-%m-%d") not in st.session_state.predicted_rows["Date"].values:
+        new_row = pd.DataFrame([{
+            "Date": pred_date.strftime("%Y-%m-%d"),
+            "Previous Close": round(previous_close, 2),
+            "Predicted Close": round(predicted_close, 2)
+        }])
+        
+        st.session_state.predicted_rows = pd.concat(
+            [st.session_state.predicted_rows, new_row],
+            ignore_index=True
+        )
+    
+    # ===============================
+    # Plot Updated Figure
+    # ===============================
+    fig = go.Figure()
+    
+    # Plot last (window+10) values for clarity
+    fig.add_trace(go.Scatter(
+        x=st.session_state.predictions.index[-(window+10):],
+        y=st.session_state.predictions['Close'].iloc[-(window+10):],
+        mode='lines+markers',
+        name='Close (Actual + Predicted)'
+    ))
+    
+    # Layout settings
+    fig.update_layout(
+        title='Latest Close Price with Predictions',
+        xaxis_title='Date',
+        yaxis_title='Close Price',
+        plot_bgcolor='rgba(0,0,0,0.7)',   # chart area background
+        paper_bgcolor='rgba(0,0,0,0.0)',  # outside area background
+        template='plotly_white'
+    )
+    
+    # Display chart
     st.plotly_chart(fig, use_container_width=True)
 
 
