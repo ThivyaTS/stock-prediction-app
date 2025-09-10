@@ -431,10 +431,19 @@ if st.button("🔮 Predict Next Day Close Price"):
     # Add predicted close value
     st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
 
-    # Only store in predicted_rows (don't overwrite actual Close)
+    # Get last actual date in CSV
+    last_actual_date = dataFrame.index[-1]
+    
+    # If prediction date is still inside CSV range, take actual too
+    if pred_date in dataFrame.index:
+        actual_close = dataFrame.loc[pred_date, "Close"]
+    else:
+        actual_close = None  # no actual available yet
+    
+    # Store both actual + predicted
     new_row = pd.DataFrame([{
         "Date": pred_date.strftime("%Y-%m-%d"),
-        "Previous Close": round(previous_close, 2),
+        "Actual Close": round(actual_close, 2) if actual_close is not None else None,
         "Predicted Close": round(predicted_close, 2)
     }])
     
@@ -468,16 +477,16 @@ if st.button("🔮 Predict Next Day Close Price"):
     # ===============================
     fig = go.Figure()
     
-    # Actual closes from CSV only
+    # Actual closes (from CSV)
     fig.add_trace(go.Scatter(
-        x=dataFrame.index[-(window+10):],
-        y=dataFrame['Close'].iloc[-(window+10):],
+        x=dataFrame.index,
+        y=dataFrame['Close'],
         mode='lines+markers',
         name='Actual Close',
         line=dict(color='blue')
     ))
     
-    # Predicted closes from predicted_rows
+    # Predicted closes (aligned with same dates)
     if not st.session_state.predicted_rows.empty:
         fig.add_trace(go.Scatter(
             x=pd.to_datetime(st.session_state.predicted_rows["Date"]),
@@ -488,8 +497,19 @@ if st.button("🔮 Predict Next Day Close Price"):
             marker=dict(size=8)
         ))
     
+        # Plot actual close from predicted_rows too (same day values)
+        if "Actual Close" in st.session_state.predicted_rows.columns:
+            fig.add_trace(go.Scatter(
+                x=pd.to_datetime(st.session_state.predicted_rows["Date"]),
+                y=st.session_state.predicted_rows["Actual Close"],
+                mode='lines+markers',
+                name='Actual Close (on Predicted Days)',
+                line=dict(color='blue', dash='dash'),
+                marker=dict(size=8, symbol='x')
+            ))
+    
     fig.update_layout(
-        title='Latest Close Price (Actual vs Predicted)',
+        title='Actual vs Predicted Close Prices',
         xaxis_title='Date',
         yaxis_title='Close Price',
         plot_bgcolor='rgba(0,0,0,0.7)',
@@ -498,6 +518,7 @@ if st.button("🔮 Predict Next Day Close Price"):
     )
     
     st.plotly_chart(fig, use_container_width=True)
+
 
 
     # -----------------------------
