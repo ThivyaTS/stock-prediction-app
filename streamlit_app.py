@@ -450,16 +450,16 @@ if st.button("🔮 Predict Next Day Close Price"):
     # -----------------------------
     fig = go.Figure()
 
-    # Actual close values
+    # Plot ALL actual closes (up to latest available in dataFrame)
     fig.add_trace(go.Scatter(
-        x=dataFrame.index[-(window+10):], 
-        y=dataFrame['Close'].iloc[-(window+10):], 
-        mode='lines+markers', 
+        x=dataFrame.index,
+        y=dataFrame['Close'],
+        mode='lines+markers',
         name='Actual Close',
         line=dict(color='royalblue', width=2)
     ))
 
-    # Predicted close values (yellow)
+    # Plot predicted closes (yellow, dotted)
     if "Predicted_Close" in st.session_state.predictions.columns:
         pred_series = st.session_state.predictions["Predicted_Close"].dropna()
         fig.add_trace(go.Scatter(
@@ -478,7 +478,7 @@ if st.button("🔮 Predict Next Day Close Price"):
         paper_bgcolor='rgba(0,0,0,0.0)',
         template='plotly_white'
     )
-    
+
     st.plotly_chart(fig, use_container_width=True)
 
     # -----------------------------
