@@ -477,7 +477,7 @@ if st.button("🔮 Predict Next Day Close Price"):
     # ===============================
     fig = go.Figure()
     
-    # Actual closes (from CSV)
+    # 1. Plot actual closes for all available dates (CSV)
     fig.add_trace(go.Scatter(
         x=dataFrame.index,
         y=dataFrame['Close'],
@@ -486,27 +486,36 @@ if st.button("🔮 Predict Next Day Close Price"):
         line=dict(color='blue')
     ))
     
-    # Predicted closes (aligned with same dates)
+    # 2. Plot predicted closes (aligned with actuals where available)
     if not st.session_state.predicted_rows.empty:
+        pred_dates = pd.to_datetime(st.session_state.predicted_rows["Date"])
+        pred_values = st.session_state.predicted_rows["Predicted Close"]
+    
         fig.add_trace(go.Scatter(
-            x=pd.to_datetime(st.session_state.predicted_rows["Date"]),
-            y=st.session_state.predicted_rows["Predicted Close"],
+            x=pred_dates,
+            y=pred_values,
             mode='lines+markers',
             name='Predicted Close',
             line=dict(color='red', dash='dot'),
             marker=dict(size=8)
         ))
     
-        # Plot actual close from predicted_rows too (same day values)
-        if "Actual Close" in st.session_state.predicted_rows.columns:
-            fig.add_trace(go.Scatter(
-                x=pd.to_datetime(st.session_state.predicted_rows["Date"]),
-                y=st.session_state.predicted_rows["Actual Close"],
-                mode='lines+markers',
-                name='Actual Close (on Predicted Days)',
-                line=dict(color='blue', dash='dash'),
-                marker=dict(size=8, symbol='x')
-            ))
+        # 3. If actuals exist for those same prediction dates → plot them too
+        matching_actuals = []
+        for d in pred_dates:
+            if d in dataFrame.index:
+                matching_actuals.append(dataFrame.loc[d, "Close"])
+            else:
+                matching_actuals.append(None)
+    
+        fig.add_trace(go.Scatter(
+            x=pred_dates,
+            y=matching_actuals,
+            mode='lines+markers',
+            name='Actual Close (Prediction Days)',
+            line=dict(color='blue'),
+            marker=dict(size=8, symbol='x')
+        ))
     
     fig.update_layout(
         title='Actual vs Predicted Close Prices',
@@ -518,6 +527,7 @@ if st.button("🔮 Predict Next Day Close Price"):
     )
     
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
