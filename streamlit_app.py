@@ -419,78 +419,63 @@ if st.button("🔮 Predict Next Day Close Price"):
     y_pred = target_scaler.inverse_transform(y_pred_scaled)
     predicted_close = y_pred[0][0]
 
-    # ==============================
-    # 🔹 Step 1: Load last_5_rows.csv (actuals)
-    # ==============================
-    # Load last 5 rows CSV
-    last_5 = pd.read_csv("last_5_rows.csv", parse_dates=["Date"])
-    last_5.set_index("Date", inplace=True)
+    # ===============================
+    # Add Prediction to Session State
+    # ===============================
+    last_date = st.session_state.predictions.index[-1]
+    pred_date = last_date + timedelta(days=1)
     
-    # Get last date and ensure it's datetime
-    pred_date = pd.to_datetime(last_5.index[-1])
+    # Get previous close value
+    previous_close = st.session_state.predictions.loc[last_date, "Close"]
     
-    # Get actual close for that date
-    actual_close = last_5.loc[pred_date, "Close"]
+    # Add predicted close value
+    st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
     
-    # Store actual + predicted
-    new_row = pd.DataFrame([{
-        "Date": pred_date.strftime("%Y-%m-%d"),
-        "Actual Close": round(actual_close, 2),
-        "Predicted Close": round(predicted_close, 2)
-    }])
-    
-    st.session_state.predicted_rows = pd.concat(
-        [st.session_state.predicted_rows, new_row],
-        ignore_index=True
+    # Show success message
+    st.success(
+        f"Predicted Close for {pred_date.date()}: **{predicted_close:.2f}**"
     )
     
-    # ==============================
-    # 🔹 Step 3: Plot Actual vs Predicted Close
-    # ==============================
+    # ==================================
+    # Store Predicted Row (Avoid Duplicates)
+    # ==================================
+    if pred_date.strftime("%Y-%m-%d") not in st.session_state.predicted_rows["Date"].values:
+        new_row = pd.DataFrame([{
+            "Date": pred_date.strftime("%Y-%m-%d"),
+            "Previous Close": round(previous_close, 2),
+            "Predicted Close": round(predicted_close, 2)
+        }])
+        
+        st.session_state.predicted_rows = pd.concat(
+            [st.session_state.predicted_rows, new_row],
+            ignore_index=True
+        )
+    
+    # ===============================
+    # Plot Updated Figure
+    # ===============================
     fig = go.Figure()
     
-    # Full actual closes (CSV history)
+    # Plot last (window+10) values for clarity
     fig.add_trace(go.Scatter(
-        x=dataFrame.index,
-        y=dataFrame['Close'],
+        x=st.session_state.predictions.index[-(window+10):],
+        y=st.session_state.predictions['Close'].iloc[-(window+10):],
         mode='lines+markers',
-        name='Actual Close',
-        line=dict(color='blue')
+        name='Close (Actual + Predicted)'
     ))
     
-    # Predicted Close (from model)
-    if not st.session_state.predicted_rows.empty:
-        fig.add_trace(go.Scatter(
-            x=pd.to_datetime(st.session_state.predicted_rows["Date"]),
-            y=st.session_state.predicted_rows["Predicted Close"],
-            mode='lines+markers',
-            name='Predicted Close',
-            line=dict(color='red', dash='dot'),
-            marker=dict(size=8)
-        ))
-    
-        # Actual Close on prediction days (from last_5_rows.csv)
-        fig.add_trace(go.Scatter(
-            x=pd.to_datetime(st.session_state.predicted_rows["Date"]),
-            y=st.session_state.predicted_rows["Actual Close"],
-            mode='lines+markers',
-            name='Actual Close (Prediction Days)',
-            line=dict(color='blue'),
-            marker=dict(size=10, symbol='x')
-        ))
-    
+    # Layout settings
     fig.update_layout(
-        title='Actual vs Predicted Close Prices',
+        title='Latest Close Price with Predictions',
         xaxis_title='Date',
         yaxis_title='Close Price',
-        plot_bgcolor='rgba(0,0,0,0.7)',
-        paper_bgcolor='rgba(0,0,0,0.0)',
+        plot_bgcolor='rgba(0,0,0,0.7)',   # chart area background
+        paper_bgcolor='rgba(0,0,0,0.0)',  # outside area background
         template='plotly_white'
     )
     
+    # Display chart
     st.plotly_chart(fig, use_container_width=True)
-
-
 
 
 
@@ -682,4 +667,3 @@ if st.button("🔮 Predict Next Day Close Price"):
 
 
     
-
