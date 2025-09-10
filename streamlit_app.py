@@ -430,6 +430,18 @@ if st.button("🔮 Predict Next Day Close Price"):
     
     # Add predicted close value
     st.session_state.predictions.loc[pred_date, "Close"] = predicted_close
+
+    # Only store in predicted_rows (don't overwrite actual Close)
+    new_row = pd.DataFrame([{
+        "Date": pred_date.strftime("%Y-%m-%d"),
+        "Previous Close": round(previous_close, 2),
+        "Predicted Close": round(predicted_close, 2)
+    }])
+    
+    st.session_state.predicted_rows = pd.concat(
+        [st.session_state.predicted_rows, new_row],
+        ignore_index=True
+    )
     
     # Show success message
     st.success(
@@ -456,16 +468,16 @@ if st.button("🔮 Predict Next Day Close Price"):
     # ===============================
     fig = go.Figure()
     
-    # Plot actual close values (from original CSV, not overwritten session state)
+    # Actual closes from CSV only
     fig.add_trace(go.Scatter(
-        x=dataFrame.index[-(window+10):],  # last 20+10 for context
+        x=dataFrame.index[-(window+10):],
         y=dataFrame['Close'].iloc[-(window+10):],
         mode='lines+markers',
         name='Actual Close',
         line=dict(color='blue')
     ))
     
-    # Plot predicted values (from predicted_rows table)
+    # Predicted closes from predicted_rows
     if not st.session_state.predicted_rows.empty:
         fig.add_trace(go.Scatter(
             x=pd.to_datetime(st.session_state.predicted_rows["Date"]),
@@ -486,7 +498,6 @@ if st.button("🔮 Predict Next Day Close Price"):
     )
     
     st.plotly_chart(fig, use_container_width=True)
-
 
 
     # -----------------------------
