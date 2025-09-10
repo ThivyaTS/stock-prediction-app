@@ -422,17 +422,17 @@ if st.button("🔮 Predict Next Day Close Price"):
     # ==============================
     # 🔹 Step 1: Load last_5_rows.csv (actuals)
     # ==============================
+    # Load last 5 rows CSV
     last_5 = pd.read_csv("last_5_rows.csv", parse_dates=["Date"])
     last_5.set_index("Date", inplace=True)
     
-    # ==============================
-    # 🔹 Step 2: When generating prediction, align with actual
-    # ==============================
-    last_date = last_5.index[-1]
-    pred_date = last_date  # we align prediction with this same date
+    # Get last date and ensure it's datetime
+    pred_date = pd.to_datetime(last_5.index[-1])
     
+    # Get actual close for that date
     actual_close = last_5.loc[pred_date, "Close"]
     
+    # Store actual + predicted
     new_row = pd.DataFrame([{
         "Date": pred_date.strftime("%Y-%m-%d"),
         "Actual Close": round(actual_close, 2),
