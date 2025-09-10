@@ -456,25 +456,35 @@ if st.button("🔮 Predict Next Day Close Price"):
     # ===============================
     fig = go.Figure()
     
-    # Plot last (window+10) values for clarity
+    # Plot actual close values (from original CSV, not overwritten session state)
     fig.add_trace(go.Scatter(
-        x=st.session_state.predictions.index[-(window+10):],
-        y=st.session_state.predictions['Close'].iloc[-(window+10):],
+        x=dataFrame.index[-(window+10):],  # last 20+10 for context
+        y=dataFrame['Close'].iloc[-(window+10):],
         mode='lines+markers',
-        name='Close (Actual + Predicted)'
+        name='Actual Close',
+        line=dict(color='blue')
     ))
     
-    # Layout settings
+    # Plot predicted values (from predicted_rows table)
+    if not st.session_state.predicted_rows.empty:
+        fig.add_trace(go.Scatter(
+            x=pd.to_datetime(st.session_state.predicted_rows["Date"]),
+            y=st.session_state.predicted_rows["Predicted Close"],
+            mode='lines+markers',
+            name='Predicted Close',
+            line=dict(color='red', dash='dot'),
+            marker=dict(size=8)
+        ))
+    
     fig.update_layout(
-        title='Latest Close Price with Predictions',
+        title='Latest Close Price (Actual vs Predicted)',
         xaxis_title='Date',
         yaxis_title='Close Price',
-        plot_bgcolor='rgba(0,0,0,0.7)',   # chart area background
-        paper_bgcolor='rgba(0,0,0,0.0)',  # outside area background
+        plot_bgcolor='rgba(0,0,0,0.7)',
+        paper_bgcolor='rgba(0,0,0,0.0)',
         template='plotly_white'
     )
     
-    # Display chart
     st.plotly_chart(fig, use_container_width=True)
 
 
