@@ -499,7 +499,7 @@ if st.button("🔮 Predict Next Day Close Price"):
             #     file_extension = mimetypes.guess_extension(inline_data.mime_type)
             #     save_binary_file(f"{file_name}{file_extension}", data_buffer)
             # else:
-                    generated_text += chunk.text + " "  # <--- Accumulate text chunks
+                 generated_text += chunk.text + " "  # <--- Accumulate text chunks
         return generated_text.strip()  # Return full concatenated text
       
       # Streamlit UI
