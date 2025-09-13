@@ -359,14 +359,14 @@ if st.button("🔮 Predict Next Day Close Price"):
         x=st.session_state.predictions.index[-(window+10):],
         y=st.session_state.predictions['Close'].iloc[-(window+10):],
         mode='lines+markers',
-        name='Close (Actual + Predicted)'
+        name='Predicted Close'
     ))
         # Plot the second series (CSV)
     fig.add_trace(go.Scatter(
         x=df_csv.index,
         y=df_csv['Close'],
         mode='markers',
-        name='Close (CSV File)'
+        name='Actual Close Price'
     ))
     # Layout settings
     fig.update_layout(
