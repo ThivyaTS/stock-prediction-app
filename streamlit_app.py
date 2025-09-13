@@ -339,7 +339,16 @@ if st.button("🔮 Predict Next Day Close Price"):
             [st.session_state.predicted_rows, new_row],
             ignore_index=True
         )
+
+        
+    # Load the second CSV file
+    df_csv = pd.read_csv("last_5_rows.csv")   # replace with actual path
+    df_csv['Date'] = pd.to_datetime(df_csv['Date'])  # ensure Date is datetime
+    df_csv.set_index('Date', inplace=True)
     
+    # Align CSV data to the same date range as predictions
+    common_range = st.session_state.predictions.index[-(window+10):]
+    df_csv = df_csv.loc[df_csv.index.isin(common_range)]
     # ===============================
     # Plot Updated Figure
     # ===============================
@@ -352,7 +361,13 @@ if st.button("🔮 Predict Next Day Close Price"):
         mode='lines+markers',
         name='Close (Actual + Predicted)'
     ))
-    
+        # Plot the second series (CSV)
+    fig.add_trace(go.Scatter(
+        x=df_csv.index,
+        y=df_csv['Close'],
+        mode='markers',
+        name='Close (CSV File)'
+    ))
     # Layout settings
     fig.update_layout(
         title='Latest Close Price with Predictions',
