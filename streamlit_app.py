@@ -8,47 +8,14 @@ import shap
 from tensorflow import keras
 import plotly.graph_objects as go
 import joblib
-import streamlit as st
-import pandas as pd
-import numpy as np
-from sklearn.impute import SimpleImputer
-import joblib
-from tensorflow import keras
-import plotly.graph_objects as go
-
 import base64
 import mimetypes
 import os
-import streamlit as st
 from google import genai
 from google.genai import types
-import streamlit as st
-import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
 from sklearn.preprocessing import MinMaxScaler 
-import os
-from google import genai
-  # make sure google-genai>=0.11.0 is in requirements.txt
-
-import plotly.graph_objects as go
-
-import os
 import logging
 import warnings
-
-import base64
-
-from st_files_connection import FilesConnection
-
-# # Create connection object and retrieve file contents.
-# # Specify input format is a csv and to cache the result for 600 seconds.
-# conn = st.connection('gcs', type=FilesConnection)
-# df = conn.read("streamlit-bucket/myfile.csv", input_format="csv", ttl=600)
-
-# # Print results.
-# for row in df.itertuples():
-#     st.write(f"{row.Owner} has a :{row.Pet}:")
 
 def set_fixed_background(image_path):
     with open(image_path, "rb") as f:
@@ -106,7 +73,6 @@ with col2:
       unsafe_allow_html=True
     )
 
-# --- Now add full-width graph below both ---
 st.markdown("---")  # optional horizontal divider
 
 # Load dataset
@@ -188,7 +154,6 @@ with col2:
     )
     st.plotly_chart(fig2, use_container_width=True)
 
-# --- Now add full-width graph below both ---
 st.markdown("---")  # optional horizontal divider
 
 # --- Load financial data ---
@@ -239,7 +204,6 @@ table_data = fin_data[display_cols].copy()
 table_data["EBITDA"] = table_data["EBITDA"].apply(format_billions)
 table_data["Operating expense"] = table_data["Operating expense"].apply(format_billions)
 
-# Optional: round EPS and margin
 table_data["EPS"] = table_data["EPS"].round(2)
 table_data["Net profit margin"] = table_data["Net profit margin"].round(2)
 
@@ -304,80 +268,6 @@ dataFrame.set_index('Date', inplace=True)
 window = 20
 latest_data = dataFrame[-window:].copy()
 
-# # -----------------------------
-# # Drop non-numeric columns (e.g., ticker or strings)
-# # -----------------------------
-# non_numeric_cols = latest_data.select_dtypes(exclude=np.number).columns
-# latest_data_numeric = latest_data.drop(columns=non_numeric_cols)
-
-# # -----------------------------
-# # Impute missing numeric values
-# # -----------------------------
-# imputer = SimpleImputer()
-# latest_scaled = pd.DataFrame(
-#     imputer.fit_transform(latest_data_numeric),
-#     columns=latest_data_numeric.columns
-# )
-
-# # -----------------------------
-# # Scale features
-# # -----------------------------
-# latest_scaled = pd.DataFrame(
-#     feature_scaler.transform(latest_scaled),
-#     columns=latest_scaled.columns
-# )
-
-# # -----------------------------
-# # Reshape for LSTM (samples, timesteps, features)
-# # -----------------------------
-# X_input = latest_scaled.values.reshape(1, window, latest_scaled.shape[1])
-
-# # -----------------------------
-# # Predict next day Close
-# # -----------------------------
-# y_pred_scaled = model.predict(X_input)
-# y_pred = target_scaler.inverse_transform(y_pred_scaled)
-# predicted_close = y_pred[0][0]
-# from datetime import timedelta
-
-# # Ensure last_date is a Timestamp
-# last_date = pd.to_datetime(dataFrame.index[-1])
-
-# # Add 3 days to skip weekend
-# pred_date = last_date + timedelta(days=3)
-
-# # -----------------------------
-# # Visualization
-# # -----------------------------
-# fig = go.Figure()
-
-# # Plot last 20 actual Close values
-# fig.add_trace(go.Scatter(
-#     x=dataFrame.index[-window:], 
-#     y=dataFrame['Close'][-window:], 
-#     mode='lines', 
-#     name='Actual Close'
-# ))
-
-# # Plot predicted next day
-# # pred_date = dataFrame.index[-1] + pd.Timedelta(days=1)
-# fig.add_trace(go.Scatter(
-#     x=[pred_date],
-#     y=[predicted_close],
-#     mode='markers',
-#     name='Predicted Close',
-#     marker=dict(color='red', size=10)
-# ))
-
-# fig.update_layout(
-#     title='Latest Close Prices + Next Day Prediction',
-#     xaxis_title='Date',
-#     yaxis_title='Close Price',
-#     template='plotly_white'
-# )
-
-# st.plotly_chart(fig, use_container_width=True)
-# st.write(f"Predicted Close price for {pred_date.date()}: **{predicted_close:.2f}**")
 #----------------------------------------------------------
 # ==============================
 # Step-by-Step Prediction Section
@@ -390,7 +280,6 @@ if "predictions" not in st.session_state:
 #new
 if "predicted_rows" not in st.session_state:
     st.session_state.predicted_rows = pd.DataFrame(columns=["Date", "Previous Close", "Predicted Close"])
-
 
 
 # Button for next prediction
@@ -546,9 +435,6 @@ if st.button("🔮 Predict Next Day Close Price"):
             "shap_importance": float(sv_sum[0, i])     # SHAP still based on scaled input
         }
     
-    # st.write("Feature Summary (for LLM, original feature values):")
-    # st.json(feature_summary)
-    
     # -----------------------------
     # Convert JSON summary to prompt text
     # -----------------------------
@@ -605,14 +491,14 @@ if st.button("🔮 Predict Next Day Close Price"):
                 or chunk.candidates[0].content.parts is None
             ):
                 continue
-            if chunk.candidates[0].content.parts[0].inline_data and chunk.candidates[0].content.parts[0].inline_data.data:
-                file_name = f"ENTER_FILE_NAME_{file_index}"
-                file_index += 1
-                inline_data = chunk.candidates[0].content.parts[0].inline_data
-                data_buffer = inline_data.data
-                file_extension = mimetypes.guess_extension(inline_data.mime_type)
-                save_binary_file(f"{file_name}{file_extension}", data_buffer)
-            else:
+            # if chunk.candidates[0].content.parts[0].inline_data and chunk.candidates[0].content.parts[0].inline_data.data:
+            #     file_name = f"ENTER_FILE_NAME_{file_index}"
+            #     file_index += 1
+            #     inline_data = chunk.candidates[0].content.parts[0].inline_data
+            #     data_buffer = inline_data.data
+            #     file_extension = mimetypes.guess_extension(inline_data.mime_type)
+            #     save_binary_file(f"{file_name}{file_extension}", data_buffer)
+            # else:
                 generated_text += chunk.text + " "  # <--- Accumulate text chunks
         return generated_text.strip()  # Return full concatenated text
       
@@ -638,18 +524,6 @@ if st.button("🔮 Predict Next Day Close Price"):
         st.warning("No explanation was generated.")
 
 
-
-
-# st.write("**What would you like to know about the prediction?**")
-# st.text_area("", user_input, height=150)
-
-# if st.button("Generate"):
-#     # Automatically use the SHAP summary prompt text
-#     # Make sure 'prompt_text' is already defined from your previous SHAP computation
-#     if prompt_text.strip():  # check if prompt_text is not empty
-#         pass
-#     else:
-#         st.warning("SHAP summary is not available yet.")
 
 
     
